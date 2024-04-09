@@ -27,16 +27,16 @@ logic           opst_exc_flag;
 logic [NW-1:0] events;   // RO; int status
 logic          int_out;
 
-logic clk_1k;
+logic clk_test;
 
 always #15625 clk_32k=~clk_32k;
-always #500000 clk_1k=~clk_1k;
+always #5000000 clk_test=~clk_test;
 
 initial begin
     clk_32k = 0;
-    clk_1k = 0;
+    clk_test = 0;
     rst_n = 0;
-    events_enable_int = -1;
+    events_enable_int = 1;
     event_clear = 0;
     rg_int_low_en = 0;
     rg_int_level_en = 1;
@@ -57,30 +57,46 @@ initial begin
     cap_cancel_done_flag = 0;
     ldo_ov_flag = 0;      
     opst_exc_flag = 0;     
-    repeat(5) @(negedge clk_1k); 
-    @(negedge clk_32k);
+    repeat(5) @(negedge clk_test); 
     rst_n = 1;
-    repeat(10) @(negedge clk_1k);  
+    repeat(10) @(negedge clk_test);  
+    clear_int(-1);
+    repeat(10) @(negedge clk_test);  
+    user_int_req();
+    repeat(20) @(negedge clk_test); 
+    events_enable_int = -1;
+    repeat(10) @(negedge clk_test);  
+    user_int_req();
+    repeat(20) @(negedge clk_test);  
+    smp_int_req();
+    repeat(20) @(negedge clk_test); 
+    clear_int(12'h100);
+    repeat(20) @(negedge clk_test); 
+    clear_int(-1);
+    repeat(10) @(negedge clk_test);  
+    $finish(2);
+
+end
+task clear_int(input [NW-1:0] int_clr);
     @(negedge clk_32k);
-    event_clear = -1;
+    event_clear = int_clr;
     @(negedge clk_32k);
     event_clear = 0;
-    repeat(10) @(negedge clk_1k);  
+endtask
+task user_int_req;
     @(negedge clk_32k);
     user_int_triger = 1;
     @(negedge clk_32k);
     user_int_triger = 0;
-    repeat(100) @(negedge clk_1k);  
+endtask
+task smp_int_req;
     @(negedge clk_32k);
-    event_clear = -1;
+    sample_err_flag = 1;
     @(negedge clk_32k);
-    event_clear = 0;
-    repeat(100) @(negedge clk_1k); 
-    $finish(2);
+    sample_err_flag = 0;
+endtask
 
-end
-
-int_ctrl #(.NW(12)) int_ctrl_inst(
+int_ctrl #(.NW(NW)) U_INT_CTRL_0(
 .clk_32k(              clk_32k     ),
 .rst_n(                rst_n     ),
 .events_enable_int(    events_enable_int),
@@ -110,6 +126,7 @@ int_ctrl #(.NW(12)) int_ctrl_inst(
 
 initial begin
     $fsdbDumpfile("int_ctrl_tb");
-    $fsdbDumpvars();
+    //$fsdbDumpfile("int_ctrl.fsdb");
+    $fsdbDumpvars(0,U_INT_CTRL_0);
 end
 endmodule
