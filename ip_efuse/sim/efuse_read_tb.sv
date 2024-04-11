@@ -1,6 +1,6 @@
 `timescale  1ns / 1ps        
 
-module tb_efuse_read;        
+module efuse_read_tb;        
 
 // efuse_read Parameters     
 parameter PERIOD    = 153.846    ;
@@ -44,7 +44,7 @@ initial  begin
     read_start = 1;
     @(negedge clk);
     read_start = 0;
-    #(PERIOD*60)
+    #(PERIOD*150)
     @(negedge clk);
     read_sel = 1;
     efuse_rdata = 8'h12;
@@ -52,7 +52,7 @@ initial  begin
     read_start = 1;
     @(negedge clk);
     read_start = 0;
-    #(PERIOD*60)
+    #(PERIOD*150)
     @(negedge clk);
     read_sel = 2;
     efuse_rdata = 8'h34;
@@ -60,7 +60,7 @@ initial  begin
     read_start = 1;
     @(negedge clk);
     read_start = 0;
-    #(PERIOD*60)
+    #(PERIOD*150)
     @(negedge clk);
     read_sel = 3;
     efuse_rdata = 8'h56;
@@ -68,7 +68,7 @@ initial  begin
     read_start = 1;
     @(negedge clk);
     read_start = 0;
-    #(PERIOD*60)
+    #(PERIOD*150)
     $finish(2);
 end
 
