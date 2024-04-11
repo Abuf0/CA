@@ -6,7 +6,6 @@ module tb_efuse_read;
 parameter PERIOD    = 153.846    ;
 parameter NR        = 64    ;
 parameter RSEL      = 256/NR;
-parameter BYTE_NUM  = NR/8  ;
 
 // efuse_read Inputs
 logic   clk                          ;
@@ -45,15 +44,37 @@ initial  begin
     read_start = 1;
     @(negedge clk);
     read_start = 0;
-
-    #(PERIOD*100)
+    #(PERIOD*60)
+    @(negedge clk);
+    read_sel = 1;
+    efuse_rdata = 8'h12;
+    @(negedge clk);
+    read_start = 1;
+    @(negedge clk);
+    read_start = 0;
+    #(PERIOD*60)
+    @(negedge clk);
+    read_sel = 2;
+    efuse_rdata = 8'h34;
+    @(negedge clk);
+    read_start = 1;
+    @(negedge clk);
+    read_start = 0;
+    #(PERIOD*60)
+    @(negedge clk);
+    read_sel = 3;
+    efuse_rdata = 8'h56;
+    @(negedge clk);
+    read_start = 1;
+    @(negedge clk);
+    read_start = 0;
+    #(PERIOD*60)
     $finish(2);
 end
 
 efuse_read #(
     .NR       ( NR       ),
-    .RSEL     ( RSEL     ),
-    .BYTE_NUM ( BYTE_NUM ))
+    .RSEL     ( RSEL     ))
  u_efuse_read (
     .clk                       ( clk                     ),
     .rst_n                     ( rst_n                   ),
