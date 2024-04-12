@@ -12,7 +12,7 @@ module efuse_read#(
     output logic [NR-1:0] read_data,
     output logic busy_read,
     // from&to efuse
-    output logic eufse_pgmen_o,
+    output logic efuse_pgmen_o,
     output logic efuse_rden_o,
     output logic efuse_aen_o,
     output logic [7:0] efuse_addr_o,
@@ -34,7 +34,7 @@ logic read_cnt_en;
 logic read_done_en_pre;
 
 // generate ctrl sig for EFUSE
-assign eufse_pgmen_o =  1'b0;
+assign efuse_pgmen_o =  1'b0;
 
 always_ff @(posedge clk or negedge rst_n) begin
     if(~rst_n)

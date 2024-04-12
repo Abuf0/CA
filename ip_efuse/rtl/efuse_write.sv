@@ -12,7 +12,7 @@ module efuse_write#(
     output logic write_done,
     output logic busy_write,
     // from&to efuse
-    output logic eufse_pgmen_o,
+    output logic efuse_pgmen_o,
     output logic efuse_rden_o,
     output logic efuse_aen_o,
     output logic [7:0] efuse_addr_o
@@ -26,6 +26,7 @@ logic aen_low_done;
 logic [9:0] write_cnt;
 logic write_cnt_clear;
 logic write_cnt_en;
+logic addr_change_en;
 
 typedef enum logic [2:0] {STANDBY,START_JUDGE,INIT,WDATA_JUDGE,AEN_H,AEN_L,W_HOLD} state_t;
 state_t state_c,state_n;
@@ -75,7 +76,7 @@ end
 assign busy_write = (state_c!=STANDBY);
 
 // generate ctrl sig for EUSE
-assign eufse_pgmen_o = (state_c!=STANDBY);
+assign efuse_pgmen_o = (state_c!=STANDBY);
 assign efuse_rden_o = 1'b0;
 assign efuse_aen_o = (state_c==AEN_H);
 
@@ -85,9 +86,9 @@ always_ff @(posedge clk or negedge rst_n) begin
     else if(write_done_en)
         efuse_addr_o <= 'd0;
     else if(start_fsm)
-        efuse_addr_o <= NW*write_sel;
+        efuse_addr_o <= NW*write_sel-1'b1;  // TODO
     else if(addr_change_en)
-        efuse_addr_o <= (efuse_addr_o==NW*write_sel)?    NW*write_sel : efuse_addr_o+1'b1;
+        efuse_addr_o <= efuse_addr_o+1'b1;
 end
 
 // generate sig for digital

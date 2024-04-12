@@ -10,7 +10,7 @@ parameter WSEL  = 256/NW;
 // efuse_write Inputs
 logic   clk                                  = 0 ;
 logic   rst_n                                = 0 ;
-logic   [9:0]  rg_efuse_tpgm                 = 0 ;
+logic   [9:0]  rg_efuse_tpgm                 = 10'd5 ;
 logic   [$clog2(WSEL)-1:0]  write_sel        = 0 ;
 logic   [NW-1:0]  write_data                 = 0 ;
 logic   write_start                          = 0 ;
@@ -32,7 +32,7 @@ end
 initial begin
     #(PERIOD*10) rst_n  =  1;
     @(negedge clk);
-    write_data = 8'hf0;
+    write_data = 8'hf1;
     @(negedge clk);
     write_start = 1;
     @(negedge clk);
@@ -40,7 +40,7 @@ initial begin
     #(PERIOD*1000)
     @(negedge clk);
     write_sel = 1;
-    write_data = 8'h12;
+    write_data = 8'h13;
     @(negedge clk);
     write_start = 1;
     @(negedge clk);

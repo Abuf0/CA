@@ -11,8 +11,8 @@
 | rg_efuse_mode | input | 2 | efuse控制模式，0：多bit读，1：多bit写，冗余待定 | |
 | rg_efuse_start | input | 1 | 硬件读写efuse启动信号，WC | |
 | rg_efuse_blank_en | input | 1 | 空片检测使能 | |
-| rg_efuse_wr_data | input | NW | WN-bit写模式的写数据 | CA中如果没有片选，一次读写256bit |
-| rg_efuse_rd_data | output | NR | RN-bit读模式的数据，和autoload读到第一片efuse数据（？ | CA同上 |
+| rg_efuse_wdata | input | NW | WN-bit写模式的写数据 | CA中如果没有片选，一次读写256bit |
+| rg_efuse_rdata | output | NR | RN-bit读模式的数据，和autoload读到第一片efuse数据（？ | CA同上 |
 | rg_efuse_read_done | output | 1 | 多bit读模式完成，RO | |
 | rg_efuse_write_done | output | 1 | 多bit写模式完成，RO | |
 | rg_efuse_no_blank | output | 1 | efuse是否为空片，1：非空 | CA只需要1bit |
