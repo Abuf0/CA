@@ -21,7 +21,6 @@ module efuse_mux#(
     input write_rden,
     input write_aen,
     input [7:0] write_addr,
-    output logic [7:0] write_rdata,
     input busy_write,
     output logic efuse_pgmen_o,
     output logic efuse_rden_o,
@@ -35,6 +34,12 @@ logic rtl_efuse_rden;
 logic rtl_efuse_aen;
 logic [7:0] rtl_efuse_addr;
 logic [7:0] rtl_efuse_rdata;
+
+logic use_efuse_pgmen;
+logic use_efuse_rden;
+logic use_efuse_aen;
+logic [7:0] use_efuse_addr;
+logic [7:0] use_efuse_rdata;
 
 logic use_efuse_pgmen_d1;
 logic use_efuse_rden_d1;
