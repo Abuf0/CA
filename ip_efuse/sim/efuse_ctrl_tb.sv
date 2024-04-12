@@ -8,11 +8,12 @@ parameter NR  = 64;
 // efuse_ctrl Inputs
 logic   clk                                  = 0 ;
 logic   rst_n                                = 0 ;
+logic   scan_mode = 0;
 logic   pmu_efuse_start                      = 0 ;
 logic   [1:0]  rg_efuse_mode                 = 0 ;
 logic   rg_efuse_start                       = 0 ;
 logic   rg_efuse_blank_en                    = 0 ;
-logic   [15:0]  rg_efuse_password            = 0 ;
+logic   [15:0]  rg_efuse_password            = 16'h55AA ;
 logic   [NW-1:0]  rg_efuse_wdata             = 0 ;
 logic   [5:0]  rg_efuse_trd                  = 3 ;
 logic   [9:0]  rg_efuse_tpgm                 = 3 ;
@@ -84,6 +85,7 @@ end
 efuse_ctrl #(.NW ( NW ),.NR ( NR )) efuse_ctrl_inst (
     .clk                               ( clk                              ),
     .rst_n                             ( rst_n                            ),
+    .scan_mode                         ( scan_mode),
     .pmu_efuse_start                   ( pmu_efuse_start                  ),
     .rg_efuse_mode                     ( rg_efuse_mode                    ),
     .rg_efuse_start                    ( rg_efuse_start                   ),

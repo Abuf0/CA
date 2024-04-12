@@ -4,6 +4,7 @@ module efuse_ctrl #(
 )(
     input clk,
     input rst_n,
+    input scan_mode,
     input pmu_efuse_start,
     // config from reg_ctrl
     input [1:0] rg_efuse_mode,
@@ -95,7 +96,7 @@ efuse_read #(.NR(NR),.RSEL(256/NR)) efuse_read_inst(
     .efuse_rdata               ( read_rdata              ), 
     .read_done                 ( read_done               ),
     .read_data                 ( read_data               ),
-    .busy_read                 ( busy_read               ),
+    .busy_read                 ( efuse_busy_read               ),
     .eufse_pgmen_o             ( read_pgmen_o            ), // -> MUX -> EFUSE
     .efuse_rden_o              ( read_rden_o             ), // -> MUX -> EFUSE
     .efuse_aen_o               ( read_aen_o              ), // -> MUX -> EFUSE
@@ -109,7 +110,7 @@ efuse_write #(.NW(NW),.WSEL(256/NW)) efuse_write_inst (
     .write_data                ( write_data              ),
     .write_start               ( write_start             ),
     .write_done                ( write_done              ),
-    .busy_write                ( busy_write              ),
+    .busy_write                ( efuse_busy_write              ),
     .eufse_pgmen_o             ( write_pgmen_o           ), // -> MUX -> EFUSE
     .efuse_rden_o              ( write_rden_o            ), // -> MUX -> EFUSE
     .efuse_aen_o               ( write_aen_o             ), // -> MUX -> EFUSE

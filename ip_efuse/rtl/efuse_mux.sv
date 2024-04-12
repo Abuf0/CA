@@ -52,6 +52,9 @@ assign rtl_efuse_pgmen = busy_read? read_pgmen:
 assign rtl_efuse_rden =  busy_read? read_rden:
                          busy_write? write_rden:
                          1'b0;
+assign rtl_efuse_addr =  busy_read? read_addr:
+                         busy_write? write_addr:
+                         8'd0;
 assign rtl_efuse_aen =   busy_read? read_aen:
                          busy_write? write_aen:
                          1'b0;
