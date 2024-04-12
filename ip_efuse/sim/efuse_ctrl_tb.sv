@@ -27,6 +27,7 @@ logic   [7:0]  efuse_rdata_i                 = 0 ;
 
 // efuse_ctrl Outputs
 logic [NR-1:0] rg_efuse_rdata        ;
+logic [7:0] rg_efuse_d;
 logic rg_efuse_read_done_manual      ;
 logic rg_efuse_write_done_manual     ;
 logic rg_efuse_no_blank              ;
@@ -53,7 +54,7 @@ initial begin
     pmu_efuse_start = 0;
     efuse_rdata_i =8'hf0;
     repeat(150) @(negedge clk);
-    efuse_rdata_i =8'hf12;
+    efuse_rdata_i =8'h12;
     repeat(150) @(negedge clk);
     efuse_rdata_i =8'h34;
     repeat(150) @(negedge clk);
@@ -84,6 +85,7 @@ efuse_ctrl #(.NW ( NW ),.NR ( NR )) efuse_ctrl_inst (
     .rg_efuse_addr                     ( rg_efuse_addr                    ),
     .efuse_rdata_i                     ( efuse_rdata_i                    ),
     .rg_efuse_rdata                    ( rg_efuse_rdata                   ),
+    .rg_efuse_d                        ( rg_efuse_d),
     .rg_efuse_read_done_manual         ( rg_efuse_read_done_manual        ),
     .rg_efuse_write_done_manual        ( rg_efuse_write_done_manual       ),
     .rg_efuse_no_blank                 ( rg_efuse_no_blank                ),

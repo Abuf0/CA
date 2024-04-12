@@ -23,6 +23,7 @@ module efuse_ctrl #(
     input [7:0] rg_efuse_addr,
     // RO to reg_ctrl
     output logic [NR-1:0] rg_efuse_rdata,
+    output logic [7:0] rg_efuse_d,
     output logic rg_efuse_read_done_manual,
     output logic rg_efuse_write_done_manual,
     output logic rg_efuse_no_blank,
@@ -50,11 +51,12 @@ logic [$clog2(256/NW)-1:0] efuse_write_sel;
 logic read_pgmen_o;
 logic read_rden_o ;
 logic read_aen_o  ;
-logic read_addr_o ;
+logic [7:0] read_addr_o ;
 logic write_pgmen_o;
 logic write_rden_o ;
 logic write_aen_o  ;
-logic write_addr_o ;
+logic [7:0] write_addr_o ;
+logic [7:0] read_rdata;
 
 efuse_rw_ctrl #(.NW(NW),.NR(NR)) efuse_rw_ctrl_inst(
    .clk                        ( clk                            ),
@@ -133,7 +135,7 @@ efuse_mux #(.NW ( NW ),.NR ( NR )) efuse_mux_inst (
     .write_addr                ( write_addr_o            ),
     .busy_write                ( busy_write              ),
     .efuse_rdata_i             ( efuse_rdata_i           ),
-    .rg_efuse_rdata            ( rg_efuse_rdata          ),
+    .rg_efuse_d            ( rg_efuse_d          ),
     .read_rdata                ( read_rdata              ), // <-- EFUSE
     .efuse_pgmen_o             ( efuse_pgmen_o           ),
     .efuse_rden_o              ( efuse_rden_o            ),

@@ -10,7 +10,7 @@ module efuse_mux#(
     input rg_efuse_rden,
     input rg_efuse_aen,
     input [7:0] rg_efuse_addr,
-    output logic [7:0] rg_efuse_rdata,
+    output logic [7:0] rg_efuse_d,
     input read_pgmen,
     input read_rden,
     input read_aen,
@@ -54,15 +54,15 @@ assign rtl_efuse_rden =  busy_read? read_rden:
                          1'b0;
 assign rtl_efuse_aen =   busy_read? read_aen:
                          busy_write? write_aen:
-                         8'd0;
+                         1'b0;
 assign read_rdata = rtl_efuse_rdata;
 
 assign use_efuse_pgmen = rg_efuse_reg_mode? rg_efuse_pgmen:rtl_efuse_pgmen;
 assign use_efuse_rden = rg_efuse_reg_mode? rg_efuse_rden:rtl_efuse_rden;
 assign use_efuse_aen = rg_efuse_reg_mode? rg_efuse_aen:rtl_efuse_aen;
 assign use_efuse_addr = rg_efuse_reg_mode? rg_efuse_addr:rtl_efuse_addr;
-assign rtl_efuse_rdata = rg_efuse_reg_mode? 1'b0:use_efuse_rdata;
-assign rg_efuse_rdata = rg_efuse_reg_mode? use_efuse_rdata:1'b0;
+assign rtl_efuse_rdata = rg_efuse_reg_mode? 8'b0:use_efuse_rdata;
+assign rg_efuse_d = rg_efuse_reg_mode? use_efuse_rdata:8'd0;
 
 // add for scan
 // ******
