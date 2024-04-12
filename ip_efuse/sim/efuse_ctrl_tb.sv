@@ -61,6 +61,22 @@ initial begin
     efuse_rdata_i =8'h56;
     repeat(150) @(negedge clk);   
     repeat(150) @(negedge clk); 
+    rg_efuse_wdata = 64'hf0f1f2f3f4f5f6f7;
+    rg_efuse_write_sel = 1;
+    rg_efuse_mode = 1;
+    @(negedge clk);
+    rg_efuse_start = 1;
+    @(negedge clk);
+    rg_efuse_start = 0;
+    repeat(200) @(negedge clk);
+    rg_efuse_read_sel = 1;
+    rg_efuse_mode = 0;
+    @(negedge clk);
+    rg_efuse_start = 1;
+    @(negedge clk);
+    rg_efuse_start = 0;
+    repeat(200) @(negedge clk);
+
     $finish(2);
 
 end

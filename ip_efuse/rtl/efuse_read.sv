@@ -122,7 +122,7 @@ assign read_hold = (read_cnt=='d0) & busy_read & ~read_start_d1 & ~efuse_aen_o;
 assign rdata_lock_en = (read_cnt=={1'b0,rg_efuse_trd}) & efuse_aen_o & busy_read;
 assign aen_high_done = (read_cnt=={1'b0,rg_efuse_trd}+1'b1) & efuse_aen_o & busy_read;
 assign aen_low_done = (read_cnt==7'hf) & ~efuse_aen_o & busy_read;
-assign read_done_en_pre = efuse_aen_o & (efuse_byte_addr == BYTE_NUM*read_sel+BYTE_NUM-1);
+assign read_done_en_pre = aen_high_done & (efuse_byte_addr == BYTE_NUM*read_sel+BYTE_NUM-1);
 assign read_done_en = read_hold & (efuse_byte_addr == BYTE_NUM*read_sel+BYTE_NUM-1);
 
 endmodule
