@@ -1,0 +1,10 @@
+/home/IC/Projects/8-EFUSE/digital/design/sim/efuse_ctrl_top.sv
+/home/IC/Projects/8-EFUSE/digital/design/rtl/efuse_ctrl.sv
+/home/IC/Projects/8-EFUSE/digital/design/rtl/efuse_rw_ctrl.sv
+/home/IC/Projects/8-EFUSE/digital/design/rtl/efuse_read.sv
+/home/IC/Projects/8-EFUSE/digital/design/rtl/efuse_write.sv
+/home/IC/Projects/8-EFUSE/digital/design/rtl/efuse_mux.sv
+/home/IC/Projects/8-EFUSE/digital/design/rtl/efuse_ctrl_new.sv
+/home/IC/Projects/8-EFUSE/digital/design/rtl/efuse_rw_ctrl_new.sv
+/home/IC/Projects/8-EFUSE/digital/design/rtl/efuse_rw_timing.sv
+/home/IC/Projects/8-EFUSE/digital/design/rtl/efuse_mux_new.sv

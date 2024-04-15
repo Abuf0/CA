@@ -1,4 +1,4 @@
-module efuse_ctrl_tb;
+module efuse_ctrl_top_tb;
 
 // efuse_ctrl Parameters
 parameter PERIOD = 153.846;
@@ -40,6 +40,18 @@ logic efuse_autoload_done            ;
 logic efuse_autoload_vld             ;
 logic efuse_busy                     ;
 
+logic [NR-1:0] rg_efuse_rdata_new   ;         
+logic [7:0] rg_efuse_d_new          ;      
+logic rg_efuse_read_done_manual_new ;
+logic rg_efuse_write_done_manual_new;
+logic rg_efuse_no_blank_new         ;
+logic efuse_pgmen_o_new             ;
+logic efuse_rden_o_new              ;
+logic efuse_aen_o_new               ;
+logic [7:0] efuse_addr_o_new        ;      
+logic efuse_autoload_done_new       ;
+logic efuse_autoload_vld_new        ;
+logic efuse_busy_new                ;
 
 
 initial begin
@@ -83,7 +95,7 @@ initial begin
 
 end
 
-efuse_ctrl #(.NW ( NW ),.NR ( NR )) efuse_ctrl_inst (
+efuse_ctrl_top #(.NW ( NW ),.NR ( NR )) efuse_ctrl_top_inst (
     .clk                               ( clk                              ),
     .rst_n                             ( rst_n                            ),
     .scan_mode                         ( scan_mode                        ),
@@ -114,47 +126,23 @@ efuse_ctrl #(.NW ( NW ),.NR ( NR )) efuse_ctrl_inst (
     .efuse_addr_o                      ( efuse_addr_o                     ),
     .efuse_autoload_done               ( efuse_autoload_done              ),
     .efuse_autoload_vld                ( efuse_autoload_vld               ),
-    .efuse_busy                        ( efuse_busy                       )
+    .efuse_busy                        ( efuse_busy                       ),
+    .rg_efuse_rdata_new                ( rg_efuse_rdata_new               ),
+    .rg_efuse_d_new                    ( rg_efuse_d_new                   ),
+    .rg_efuse_read_done_manual_new     ( rg_efuse_read_done_manual_new    ),
+    .rg_efuse_write_done_manual_new    ( rg_efuse_write_done_manual_new   ),
+    .rg_efuse_no_blank_new             ( rg_efuse_no_blank_new            ),
+    .efuse_pgmen_o_new                 ( efuse_pgmen_o_new                ),
+    .efuse_rden_o_new                  ( efuse_rden_o_new                 ),
+    .efuse_aen_o_new                   ( efuse_aen_o_new                  ),
+    .efuse_addr_o_new                  ( efuse_addr_o_new                 ),
+    .efuse_autoload_done_new           ( efuse_autoload_done_new          ),
+    .efuse_autoload_vld_new            ( efuse_autoload_vld_new           ),
+    .efuse_busy_new                    ( efuse_busy_new                   )    
 );
-/*
-efuse_ctrl_new #(.NW ( NW ),.NR ( NR )) efuse_ctrl_new_inst (
-    .clk                               ( clk                              ),
-    .rst_n                             ( rst_n                            ),
-    .scan_mode                         ( scan_mode                        ),
-    .pmu_efuse_start                   ( pmu_efuse_start                  ),
-    .rg_efuse_mode                     ( rg_efuse_mode                    ),
-    .rg_efuse_start                    ( rg_efuse_start                   ),
-    .rg_efuse_blank_en                 ( rg_efuse_blank_en                ),
-    .rg_efuse_password                 ( rg_efuse_password                ),
-    .rg_efuse_wdata                    ( rg_efuse_wdata                   ),
-    .rg_efuse_trd                      ( rg_efuse_trd                     ),
-    .rg_efuse_tpgm                     ( rg_efuse_tpgm                    ),
-    .rg_efuse_reg_mode                 ( rg_efuse_reg_mode                ),
-    .rg_efuse_read_sel                 ( rg_efuse_read_sel                ),
-    .rg_efuse_write_sel                ( rg_efuse_write_sel               ),
-    .rg_efuse_pgmen                    ( rg_efuse_pgmen                   ),
-    .rg_efuse_rden                     ( rg_efuse_rden                    ),
-    .rg_efuse_aen                      ( rg_efuse_aen                     ),
-    .rg_efuse_addr                     ( rg_efuse_addr                    ),
-    .efuse_rdata_i                     ( efuse_rdata_i                    ),
-    .rg_efuse_rdata                    ( rg_efuse_rdata_new                   ),
-    .rg_efuse_d                        ( rg_efuse_d_new                       ),
-    .rg_efuse_read_done_manual         ( rg_efuse_read_done_manual        ),
-    .rg_efuse_write_done_manual        ( rg_efuse_write_done_manual       ),
-    .rg_efuse_no_blank                 ( rg_efuse_no_blank                ),
-    .efuse_pgmen_o                     ( efuse_pgmen_o                    ),
-    .efuse_rden_o                      ( efuse_rden_o                     ),
-    .efuse_aen_o                       ( efuse_aen_o                      ),
-    .efuse_addr_o                      ( efuse_addr_o                     ),
-    .efuse_autoload_done               ( efuse_autoload_done              ),
-    .efuse_autoload_vld                ( efuse_autoload_vld               ),
-    .efuse_busy                        ( efuse_busy                      )
-);
-*/
-
 
 initial begin    
-    $fsdbDumpfile("efuse_ctrl.fsdb");
+    $fsdbDumpfile("efuse_ctrl_top.fsdb");
     $fsdbDumpvars();
 end
 

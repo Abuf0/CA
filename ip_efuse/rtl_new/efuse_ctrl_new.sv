@@ -1,4 +1,4 @@
-module efuse_ctrl #(
+module efuse_ctrl_new #(
     parameter NW = 64,
     parameter NR = 64
 )(
@@ -49,17 +49,14 @@ logic write_start;
 logic [NW-1:0] write_data;
 logic [$clog2(256/NR)-1:0] efuse_read_sel; 
 logic [$clog2(256/NW)-1:0] efuse_write_sel;
-logic read_pgmen_o;
-logic read_rden_o ;
-logic read_aen_o  ;
-logic [7:0] read_addr_o ;
-logic write_pgmen_o;
-logic write_rden_o ;
-logic write_aen_o  ;
-logic [7:0] write_addr_o ;
+logic efuse_pgmen;
+logic efuse_rden ;
+logic efuse_aen  ;
+logic [7:0] efuse_addr;
 logic [7:0] read_rdata;
+logic [7:0] efuse_d;
 
-efuse_rw_ctrl #(.NW(NW),.NR(NR)) efuse_rw_ctrl_inst(
+efuse_rw_ctrl_new #(.NW(NW),.NR(NR)) efuse_rw_ctrl_new_inst(
    .clk                        ( clk                            ),
    .rst_n                      ( rst_n                          ),
    .pmu_efuse_start            ( pmu_efuse_start                ),
@@ -77,7 +74,7 @@ efuse_rw_ctrl #(.NW(NW),.NR(NR)) efuse_rw_ctrl_inst(
    .rg_efuse_wdata             ( rg_efuse_wdata                 ),
    .rg_efuse_rdata             ( rg_efuse_rdata                 ),
    .rg_efuse_read_done_manual  ( rg_efuse_read_done_manual      ),
-   .rg_efuse_write_done_manual  ( rg_efuse_write_done_manual      ),
+   .rg_efuse_write_done_manual ( rg_efuse_write_done_manual     ),
    .rg_efuse_no_blank          ( rg_efuse_no_blank              ),
    .efuse_autoload_done        ( efuse_autoload_done            ),
    .efuse_autoload_vld         ( efuse_autoload_vld             ),
@@ -88,36 +85,29 @@ efuse_rw_ctrl #(.NW(NW),.NR(NR)) efuse_rw_ctrl_inst(
    .write_start                ( write_start                    ),
    .write_data                 ( write_data                     )    
 );
-efuse_read #(.NR(NR),.RSEL(256/NR)) efuse_read_inst(
+efuse_rw_timing #(.NW(NW),.NR(NR)) efuse_rw_timing_inst (
     .clk                       ( clk                     ),
     .rst_n                     ( rst_n                   ),
-    .rg_efuse_trd              ( rg_efuse_trd            ),
-    .read_sel                  ( efuse_read_sel          ),
     .read_start                ( read_start              ),
-    .efuse_rdata               ( read_rdata              ), 
-    .read_done                 ( read_done               ),
-    .read_data                 ( read_data               ),
-    .busy_read                 ( efuse_busy_read               ),
-    .efuse_pgmen_o             ( read_pgmen_o            ), // -> MUX -> EFUSE
-    .efuse_rden_o              ( read_rden_o             ), // -> MUX -> EFUSE
-    .efuse_aen_o               ( read_aen_o              ), // -> MUX -> EFUSE
-    .efuse_addr_o              ( read_addr_o             )  // -> MUX -> EFUSE
-);
-efuse_write #(.NW(NW),.WSEL(256/NW)) efuse_write_inst (
-    .clk                       ( clk                     ),
-    .rst_n                     ( rst_n                   ),
-    .rg_efuse_tpgm             ( rg_efuse_tpgm           ),
-    .write_sel                 ( efuse_write_sel         ),
-    .write_data                ( write_data              ),
     .write_start               ( write_start             ),
-    .write_done                ( write_done              ),
-    .busy_write                ( efuse_busy_write              ),
-    .efuse_pgmen_o             ( write_pgmen_o           ), // -> MUX -> EFUSE
-    .efuse_rden_o              ( write_rden_o            ), // -> MUX -> EFUSE
-    .efuse_aen_o               ( write_aen_o             ), // -> MUX -> EFUSE
-    .efuse_addr_o              ( write_addr_o            )  // -> MUX -> EFUSE
+    .read_sel                  ( efuse_read_sel          ),  
+    .write_sel                 ( efuse_write_sel         ),    
+    .rg_efuse_trd              ( rg_efuse_trd            ),
+    .rg_efuse_tpgm             ( rg_efuse_tpgm           ),
+    .rg_efuse_mode             ( rg_efuse_mode[0]           ),  // TODO       
+    .read_data                 ( read_data               ),
+    .write_data                ( write_data              ),
+    .efuse_pgmen               ( efuse_pgmen             ),
+    .efuse_rden                ( efuse_rden              ),
+    .efuse_aen                 ( efuse_aen               ),
+    .efuse_addr                ( efuse_addr              ),
+    .efuse_d                   ( efuse_d                 ),
+    .busy_read                 ( efuse_busy_read         ),
+    .busy_write                ( efuse_busy_write        ),
+    .read_done                 ( read_done               ),    
+    .write_done                ( write_done              )
 );
-efuse_mux #(.NW ( NW ),.NR ( NR )) efuse_mux_inst (
+efuse_mux_new #(.NW ( NW ),.NR ( NR )) efuse_mux_new_inst (
     .clk                       ( clk                     ),
     .rst_n                     ( rst_n                   ),
     .scan_mode                 ( scan_mode               ),
@@ -126,19 +116,15 @@ efuse_mux #(.NW ( NW ),.NR ( NR )) efuse_mux_inst (
     .rg_efuse_rden             ( rg_efuse_rden           ),
     .rg_efuse_aen              ( rg_efuse_aen            ),
     .rg_efuse_addr             ( rg_efuse_addr           ),
-    .read_pgmen                ( read_pgmen_o            ),
-    .read_rden                 ( read_rden_o             ),
-    .read_aen                  ( read_aen_o              ),
-    .read_addr                 ( read_addr_o             ),
-    .busy_read                 ( efuse_busy_read               ),
-    .write_pgmen               ( write_pgmen_o           ),
-    .write_rden                ( write_rden_o            ),
-    .write_aen                 ( write_aen_o             ),
-    .write_addr                ( write_addr_o            ),
-    .busy_write                ( efuse_busy_write              ),
+    .efuse_pgmen               ( efuse_pgmen             ),
+    .efuse_rden                ( efuse_rden              ),
+    .efuse_aen                 ( efuse_aen               ),
+    .efuse_addr                ( efuse_addr              ),
+    .busy_read                 ( efuse_busy_read         ),
+    .busy_write                ( efuse_busy_write        ),
     .efuse_rdata_i             ( efuse_rdata_i           ),
-    .rg_efuse_d            ( rg_efuse_d          ),
-    .read_rdata                ( read_rdata              ), // <-- EFUSE
+    .rg_efuse_d                ( rg_efuse_d              ),
+    .read_rdata                ( efuse_d                 ), // <-- EFUSE
     .efuse_pgmen_o             ( efuse_pgmen_o           ),
     .efuse_rden_o              ( efuse_rden_o            ),
     .efuse_aen_o               ( efuse_aen_o             ),

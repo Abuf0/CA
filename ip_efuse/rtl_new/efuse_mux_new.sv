@@ -1,4 +1,4 @@
-module efuse_mux#(
+module efuse_mux_new#(
     parameter NW = 64,
     parameter NR = 64    
 )(
@@ -11,16 +11,12 @@ module efuse_mux#(
     input rg_efuse_aen,
     input [7:0] rg_efuse_addr,
     output logic [7:0] rg_efuse_d,
-    input read_pgmen,
-    input read_rden,
-    input read_aen,
-    input [7:0] read_addr,
+    input efuse_pgmen,
+    input efuse_rden,
+    input efuse_aen,
+    input [7:0] efuse_addr,
     output logic [7:0] read_rdata,
     input busy_read,
-    input write_pgmen,
-    input write_rden,
-    input write_aen,
-    input [7:0] write_addr,
     input busy_write,
     output logic efuse_pgmen_o,
     output logic efuse_rden_o,
@@ -46,18 +42,14 @@ logic use_efuse_rden_d1;
 logic use_efuse_aen_d1;
 logic [7:0] use_efuse_addr_d1;
 
-assign rtl_efuse_pgmen = busy_read? read_pgmen:
-                         busy_write? write_pgmen:
-                         1'b0;
-assign rtl_efuse_rden =  busy_read? read_rden:
-                         busy_write? write_rden:
-                         1'b0;
-assign rtl_efuse_addr =  busy_read? read_addr:
-                         busy_write? write_addr:
-                         8'd0;
-assign rtl_efuse_aen =   busy_read? read_aen:
-                         busy_write? write_aen:
-                         1'b0;
+logic busy;
+
+assign busy = busy_read | busy_write;
+
+assign rtl_efuse_pgmen = busy?  efuse_pgmen:1'b0;
+assign rtl_efuse_rden =  busy?  efuse_rden:1'b0;
+assign rtl_efuse_addr =  busy?  efuse_addr:8'd0;
+assign rtl_efuse_aen =   busy?  efuse_aen:1'b0;
 assign read_rdata = rtl_efuse_rdata;
 
 assign use_efuse_pgmen = rg_efuse_reg_mode? rg_efuse_pgmen:rtl_efuse_pgmen;
