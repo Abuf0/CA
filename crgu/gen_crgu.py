@@ -1,16 +1,25 @@
 import openpyxl
 class clock:
-    def __init__(self,src,dest,div,ckgt):
+    def __init__(self,src,dest,div,ckgt,mux_sel,mux_source,to_module):
         self.src = src
         self.dest = dest
         self.div = div
         self.ckgt = ckgt
+        self.mux = max
+        self.mux_sel = mux_sel
+        self.mux_source = mux_source
+        self.to_module = to_module
     def print_info(self):
         print("clock path : "+self.src+" --> "+self.dest)
         print("dest : ",self.dest)
         print("src  : ",self.src)
         print("div  : ",self.div)
         print("ckgt : ",self.ckgt)
+        print("mux_sel : ",self.mux_sel)
+        print("mux_source : ",self.mux_source)
+        print("to_module : ",self.to_module)
+
+    '''
     def connect(self):
         if(self.div==1):
             if(self.ckgt==None):
@@ -22,6 +31,22 @@ class clock:
                 print("\033[93m"+self.src +" --> SCAN_MUX(scan_clk) --> DIV("+ str(self.div) +") --> SCAN_MUX(scan_clk) --> " + self.dest+"\033[0m")
             else:
                 print("\033[93m"+self.src +" --> SCAN_MUX(scan_clk) --> DIV("+ str(self.div) +") --> ICG("+ self.ckgt +") --> " + self.dest+"\033[0m")
+    '''
+    def connect(self):
+        if(self.mux_sel==None):
+            if(self.div==1):
+                if(self.ckgt==None):
+                    print("\033[93m"+self.src + " --> SCAN_MUX(scan_clk) --> " + self.dest+"\033[0m")
+                else:
+                    print("\033[93m"+self.src +" --> SCAN_MUX(scan_clk) --> ICG("+ self.ckgt +") --> " + self.dest+"\033[0m")
+            elif(self.div>1):
+                if(self.ckgt==None):
+                    print("\033[93m"+self.src +" --> SCAN_MUX(scan_clk) --> DIV("+ str(self.div) +") --> SCAN_MUX(scan_clk) --> " + self.dest+"\033[0m")
+                else:
+                    print("\033[93m"+self.src +" --> SCAN_MUX(scan_clk) --> DIV("+ str(self.div) +") --> ICG("+ self.ckgt +") --> " + self.dest+"\033[0m")
+
+
+                
 
 class reset:
     def __init__(self,dest_rstn,sync_clk,ls_grstn,ls_lrstn):
@@ -74,14 +99,35 @@ col_num = sheet_clock.max_column
 #print(col_num)
 clock_num = col_num-1
 objects = []
+ls_ckgt = []
+ls_mux_source = []
+ls_to_module = []
 #print(clock_num)
 ## 实例化类对象
 for col in range(2,col_num+1):
+    ls_ckgt = []
+    ls_mux_source = []
+    ls_to_module = []
     dest = sheet_clock.cell(1, col).value
     src = sheet_clock.cell(3, col).value
     div = sheet_clock.cell(5, col).value
-    ckgt = sheet_clock.cell(6, col).value
-    obj = clock(src,dest,div,ckgt)
+    #ckgt = sheet_clock.cell(6, col).value
+    for i in range(6,row_num+1):
+        if(sheet_clock.cell(i, 1).value == 'mux_sel'):
+            mux_sel_row = i
+            break
+        ls_ckgt.append(sheet_clock.cell(i, col).value)
+    mux_sel = sheet_clock.cell(mux_sel_row, col).value
+    for i in range(mux_sel_row+1,row_num+1):
+        if(sheet_clock.cell(i, 1).value == 'to_module'):
+            to_module_row = i
+            break
+        ls_mux_source.append(sheet_clock.cell(i, col).value)
+    for i in range(to_module_row,row_num+1):
+        if(sheet_clock.cell(i, col).value == None):
+            break    
+        ls_to_module.append(sheet_clock.cell(i, col).value)
+    obj = clock(src,dest,div,ls_ckgt,mux_sel,ls_mux_source,ls_to_module)
     objects.append(obj)
 ## 操作类
 print("----------------------------------------------------------------")
@@ -133,6 +179,6 @@ for col in range(2,col_num+1):
 ## 操作类
 print("----------------------------------------------------------------")
 for obj in objects:
-    obj.print_info()
-    obj.connect()
+    #obj.print_info()
+    #obj.connect()
     print("----------------------------------------------------------------")
