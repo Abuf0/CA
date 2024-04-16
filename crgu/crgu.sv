@@ -129,7 +129,7 @@ assign rst_slot_n = rst_13m_shut_n;
 assign rst_afe_n  = rst_13m_shut_n;
 
 // sync
-sync_level clk_en_sync_inst (.clk(clk_13m_alon_scan), .rstn(rst_13m_alon_n), .data_in(rg_top_start), .data_out(clk_en_sync));    // 32K --> 13M
+sync_level clk_en_sync_inst (.clk(clk_13m_alon_scan), .rstn(rst_13m_alon_n), .data_in(clk_en), .data_out(clk_en_sync));    // 32K --> 13M
 sync_level rg_top_start_sync_inst (.clk(clk_32k_alon_scan), .rstn(rst_32k_alon_n), .data_in(rg_top_start), .data_out(rg_top_start_sync));   // 6.5M --> 32K
 
 always_ff@(posedge clk_6p5m_reg or negedge rst_reg_n) begin
