@@ -17,6 +17,7 @@ logic   I2C_CLK                              = 0 ;
 logic   AD_POR_RSTN                          = 0 ;
 logic   cmd_reset                            = 0 ;
 logic   shut_rstn                            = 0 ;
+logic   rg_clk_sel                           = 1 ;
 logic   clk_en                               = 0 ;
 logic   rg_top_start                         = 0 ;
 logic   data_ctrl_en                         = 0 ;
@@ -74,7 +75,7 @@ initial begin
     // rstn case
     shut_rstn = 0;
     repeat(10)   @(negedge AD_OSC32K); 
-    shut_rst = 1;
+    shut_rstn = 1;
     repeat(10)   @(negedge AD_OSC32K); 
     @(posedge SPI_CLK);
     #1
@@ -98,7 +99,11 @@ initial begin
     rg_fifo_clk_en = 0;
     repeat(10)   @(negedge AD_OSC32K);
     rg_fifo_clk_en = 1;
-    repeat(10)   @(negedge AD_OSC32K);        
+    repeat(10)   @(negedge AD_OSC32K);      
+    @(posedge SPI_CLK);
+    #1
+    rg_clk_sel = 1;
+    repeat(10)   @(negedge AD_OSC32K); 
     $finish(2);
 end
 
@@ -115,6 +120,7 @@ crgu  U_CRGU (
     .AD_POR_RSTN             ( AD_POR_RSTN       ),
     .cmd_reset               ( cmd_reset         ),
     .shut_rstn               ( shut_rstn         ),
+    .rg_clk_sel              ( rg_clk_sel        ),
     .clk_en                  ( clk_en            ),
     .rg_top_start            ( rg_top_start      ),
     .data_ctrl_en            ( data_ctrl_en      ),

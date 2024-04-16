@@ -15,6 +15,7 @@ module crgu(
     input cmd_reset,    // From spi/i2c
     input shut_rstn,    // From PMU
     // clock & reset ctrl 
+    input rg_clk_sel,   // from reg_ctrl @ 6.5M
     input clk_en,   // From PMU @ 32K
     input rg_top_start, // From reg_ctrl @ 6.5M
     input data_ctrl_en, // TODO & for sync
@@ -75,7 +76,7 @@ logic rg_top_start_d1;
 // generate clock dest
 // 32K
 genpart_ckmux2 dtc_OSC32K_scanmux   (.clkin1(scan_clk), .clkin0(AD_OSC32K), .sel(scan_mode), .clkout(AD_OSC32K_scan));
-genpart_ckmux2 dtc_OSC32K_scanmux   (.clkin1(scan_clk), .clkin0(CLKIN), .sel(scan_mode), .clkout(CLKIN_scan));
+genpart_ckmux2 dtc_CLKIN_scanmux   (.clkin1(scan_clk), .clkin0(CLKIN), .sel(scan_mode), .clkout(CLKIN_scan));
 omsp_clock_mux clk_32k_mux_inst (.clk_in0(AD_OSC32K_scan), .clk_in1(CLKIN_scan), .select(rg_clk_sel), .clk_out(clk_32k_alon_scan), .resetn(ad_por_rstn_scan), .scan_mode(scan_mode), .scan_rstn(scan_rstn));
 
 genpart_ckgt clk_32k_shut_ckgt_inst (.clk(clk_32k_alon_scan), .gclk(clk_32k_shut_scan), .scan_enable(scan_enable), .enable(clk_en));
