@@ -53,12 +53,11 @@ logic int_out_vld;
 logic int_on_d1;
 logic int_on_neg;
 logic int_on;
-logic int_on_final;
+logic int_on_gap;
 logic int_on_real;
 
-logic tout_en;
-logic tout_en_d1;
-logic tout_en_pos;
+logic int_on_gap_d1;
+logic int_on_gap_pos;
 
 logic time_out;
 logic time_out_tmp;
@@ -97,7 +96,7 @@ generate
                         int_lat[i] <= 1'b1;
                     else if(int_clr_sync[i])
                         int_lat[i] <= 1'b0;
-                    else if(~frame_done_flag)   // TODO for sync
+                    else if(~frame_done_flag)   
                         int_lat[i] <= 1'b0;
                 end
             end
@@ -119,68 +118,42 @@ generate
     end
 endgenerate
 
-/*
+// new -- 0417
 always_ff @(posedge clk_32k or negedge rst_n)  begin
     if(~rst_n)
-        int_status <= 'd0;
-    else if(|int_req_real)
-        int_status <= int_req_real | int_status;
-    else if(|int_clr_real)
-        int_status <= (~int_clr_real) & int_status; 
+        int_out_tmp <= 1'b0;
+    else if(rg_int_level_en)  begin // level
+        if(int_out_tmp && ~int_on)
+            int_out_tmp <= 1'b0;
+        else if(int_on && ~int_out_tmp)
+            int_out_tmp <= 1'b1;
+    end
+    else begin  // pulse
+        if(time_out)
+            int_out_tmp <= ~int_out_tmp;
+    end
 end
-*/
 
-assign int_vld = rg_int_low_en? 1'b0:1'b1;
-assign int_out_vld = (int_out == int_vld);
-
-assign int_clr_real = (int_clr_sync & ~int_req_real);  
+assign int_out = int_out_tmp?   int_vld:~int_vld; 
 
 assign int_on = |(int_status & int_enable);
-
-assign int_on_real = rg_int_level_en?   int_on:int_on_final;
-
+assign int_vld = rg_int_low_en? 1'b0:1'b1;
+assign int_out_vld = (int_out == int_vld);
 assign cold_time = {rg_cold_time,5'd0}+13'd30;
 assign width_time = rg_int_width;
 assign time_out_tmp = int_out_vld?  (tcnt==width_time):(tcnt==cold_time);
-assign time_out = time_out_tmp | tout_en_pos;
-assign tout_en = int_out_vld | int_on_real;
+assign time_out = time_out_tmp | int_on_gap_pos;
 
 always_ff @(posedge clk_32k or negedge rst_n)  begin
     if(~rst_n)
         tcnt <= 'd0;
     else if(~rg_int_level_en) begin
-        if(reset_int_flag)
-            tcnt <= cold_time;
-        else if(clear_int | set_int | time_out)
+        if(time_out)
             tcnt <= 'd0;
-        else if(tout_en)
-            tcnt <= tcnt+1'b1;
+        else if(int_on_gap)
+            tcnt <= tcnt + 1'b1;
     end
-    else
-        tcnt <= 'd0;
 end
-
-assign clear_int = (int_out_vld & time_out & ~rg_int_level_en) || (~int_on && int_out_vld);
-
-always_ff @(posedge clk_32k or negedge rst_n)  begin
-    if(~rst_n)
-        set_int <= 1'b0;
-    else if(rg_int_level_en)
-        set_int <= (int_on_real & ~int_out_vld);
-    else
-        set_int <= (int_on_real & time_out & ~int_out_vld);
-end
-
-always_ff @(posedge clk_32k or negedge rst_n)  begin
-    if(~rst_n)
-        int_out_tmp <= 1'b0;
-    else if(set_int)
-        int_out_tmp <= 1'b1;
-    else if(clear_int)
-        int_out_tmp <= 1'b0;
-end
-
-assign int_out = int_out_tmp?   int_vld:~int_vld;
 
 // reset_int_flag
 always_ff @(posedge clk_32k or negedge rst_n)   begin
@@ -236,18 +209,8 @@ always_ff @(posedge clk_32k or negedge rst_n) begin
 end
 
 // pulse gap
-/*
-pulse_gap pulse_gap_inst(
-    .clk(clk_32k),
-    .rstn(rst_n),
-    .check_pulse(|int_clr_real && int_on_neg),
-    .int_on(int_on),
-    .int_out_vld(int_out_vld),
-    .tcnt(tcnt),
-    .int_on_final(int_on_final)
-);
-*/
-assign check_pulse = (|int_clr_real && int_on_neg);
+//assign check_pulse = (|int_clr_real && int_on_neg);
+assign check_pulse =  int_on_neg;
 assign gap_en = int_out_vld?    check_pulse:(check_pulse & (tcnt<11'd28));
 
 always_ff @(posedge clk_32k or negedge rst_n)  begin
@@ -267,7 +230,7 @@ always_ff @(posedge clk_32k or negedge rst_n)  begin
     else
         mask <= 1'b0;
 end
-assign int_on_final = int_on & ~mask;
+assign int_on_gap = int_on & ~mask;
 
 // sync
 // TODO for int_req sync
@@ -302,11 +265,11 @@ assign int_on_neg = int_on_d1 & ~int_on;
 
 always_ff @(posedge clk_32k or negedge rst_n) begin
     if(~rst_n)
-        tout_en_d1 <= 'd0;
+        int_on_gap_d1 <= 'd0;
     else 
-        tout_en_d1 <= tout_en;
+        int_on_gap_d1 <= int_on_gap;
 end
-assign tout_en_pos = tout_en & ~tout_en_d1;
+assign int_on_gap_pos = int_on_gap & ~int_on_gap_d1;
 
 always_ff @(posedge clk_32k or negedge rst_n) begin
     if(~rst_n)
@@ -319,5 +282,6 @@ assign timer_on_sync_neg = timer_on_sync_d1 & ~timer_on_sync;
 assign int_clr_sync = rg_int_clr;
 assign int_enable = rg_int_enable;
 assign timer_on_sync = rg_timer_on;
+
 
 endmodule

@@ -38,7 +38,7 @@ initial begin
     rg_int_enable = 1;
     rg_int_clr = 0;
     rg_int_low_en = 0;
-    rg_int_level_en = 1;
+    rg_int_level_en = 0;
     rg_int_width = 11'h27f;
     rg_cold_time = 6'h13;
     rg_int_after_frame = 0;
@@ -71,6 +71,8 @@ initial begin
     clear_int(12'h100);
     repeat(20) @(negedge clk_test); 
     clear_int(-1);
+    @(negedge clk_32k)
+    user_int_req();
     repeat(10) @(negedge clk_test);  
     $finish(2);
 
