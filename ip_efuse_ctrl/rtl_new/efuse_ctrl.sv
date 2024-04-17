@@ -28,6 +28,7 @@ module efuse_ctrl #(
     output logic rg_efuse_read_done_manual, // To reg_ctrl
     output logic rg_efuse_write_done_manual,    // To reg_ctrl
     output logic rg_efuse_no_blank, // To reg_ctrl
+    output logic rg_efuse_aen_done, // To reg_ctrl
     // interface with EFUSE
     output logic efuse_pgmen_o, // To EFUSE IP
     output logic efuse_rden_o,  // To EFUSE IP
@@ -114,7 +115,7 @@ efuse_mux #(.NW ( NW ),.NR ( NR )) efuse_mux_inst (
     .rg_efuse_reg_mode         ( rg_efuse_reg_mode       ),
     .rg_efuse_pgmen            ( rg_efuse_pgmen          ),
     .rg_efuse_rden             ( rg_efuse_rden           ),
-    .rg_efuse_aen              ( rg_efuse_aen            ),
+    .rg_efuse_aen              ( rg_efuse_aen_use        ), // from efuse_aen_gen
     .rg_efuse_addr             ( rg_efuse_addr           ),
     .efuse_pgmen               ( efuse_pgmen             ),
     .efuse_rden                ( efuse_rden              ),
@@ -129,5 +130,17 @@ efuse_mux #(.NW ( NW ),.NR ( NR )) efuse_mux_inst (
     .efuse_rden_o              ( efuse_rden_o            ),
     .efuse_aen_o               ( efuse_aen_o             ),
     .efuse_addr_o              ( efuse_addr_o            )
-);    
+);  
+efuse_aen_gen efuse_aen_gen_inst (
+    .clk                       ( clk                     ),
+    .rst_n                     ( rst_n                   ),
+    .rg_efuse_tpgm             ( rg_efuse_tpgm           ), 
+    .rg_efuse_refresh          ( rg_efuse_refresh        ),
+    .rg_efuse_pgmen            ( rg_efuse_pgmen          ),
+    .rg_efuse_rden             ( rg_efuse_rden           ),
+    .rg_efuse_aen              ( rg_efuse_aen            ), 
+    .rg_efuse_addr             ( rg_efuse_addr           ),
+    .rg_efuse_aen_use          ( rg_efuse_aen_use        ),
+    .rg_efuse_aen_done         ( rg_efuse_aen_done       )   
+);  
 endmodule
