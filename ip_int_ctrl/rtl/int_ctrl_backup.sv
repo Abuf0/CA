@@ -106,34 +106,19 @@ generate
     end
 endgenerate
 
-generate
-    for(i=0;i<NW;i=i+1) begin:  int_status_BK
-        always_ff @(posedge clk_32k or negedge rst_n)  begin
-            if(~rst_n)  
-                int_status[i] <= 1'b0;
-            else if(int_req_real[i])
-                int_status[i] <= 1'b1;
-            else if(int_clr_sync[i])
-                int_status[i] <= 1'b0;
-        end
-    end
-endgenerate
-
-/*
-always_ff @(posedge clk_32k or negedge rst_n)  begin
-    if(~rst_n)
-        int_status <= 'd0;
-    else if(|int_req_real)
-        int_status <= int_req_real | int_status;
-    else if(|int_clr_real)
-        int_status <= (~int_clr_real) & int_status; 
-end
-*/
-
 assign int_vld = rg_int_low_en? 1'b0:1'b1;
 assign int_out_vld = (int_out == int_vld);
 
-assign int_clr_real = (int_clr_sync & ~int_req_real);  
+assign int_clr_real = (int_clr_sync & ~int_req_pos);  
+
+always_ff @(posedge clk_32k or negedge rst_n)  begin
+    if(~rst_n)
+        int_status <= 'd0;
+    else if(|int_req_pos)
+        int_status <= int_req_pos | int_status;
+    else if(|int_clr_real)
+        int_status <= (~int_clr_real) & int_status; 
+end
 
 assign int_on = |(int_status & int_enable);
 
@@ -272,7 +257,7 @@ assign int_on_final = int_on & ~mask;
 // sync
 // TODO for int_req sync
 assign int_req_sync = {
-                        circuit_exc_flag,       // 10
+                        circuit_exc_flag,          // 10
                         ldo_ov_flag,            // 9
                         cap_cancel_done_flag,   // 8
                         sample_err_flag,        // 7
