@@ -1,4 +1,4 @@
-module efuse_ctrl_new #(
+module efuse_ctrl #(
     parameter NW = 64,
     parameter NR = 64
 )(
@@ -56,7 +56,7 @@ logic [7:0] efuse_addr;
 logic [7:0] read_rdata;
 logic [7:0] efuse_d;
 
-efuse_rw_ctrl_new #(.NW(NW),.NR(NR)) efuse_rw_ctrl_new_inst(
+efuse_rw_ctrl #(.NW(NW),.NR(NR)) efuse_rw_ctrl_inst(
    .clk                        ( clk                            ),
    .rst_n                      ( rst_n                          ),
    .pmu_efuse_start            ( pmu_efuse_start                ),
@@ -107,7 +107,7 @@ efuse_rw_timing #(.NW(NW),.NR(NR)) efuse_rw_timing_inst (
     .read_done                 ( read_done               ),    
     .write_done                ( write_done              )
 );
-efuse_mux_new #(.NW ( NW ),.NR ( NR )) efuse_mux_new_inst (
+efuse_mux #(.NW ( NW ),.NR ( NR )) efuse_mux_inst (
     .clk                       ( clk                     ),
     .rst_n                     ( rst_n                   ),
     .scan_mode                 ( scan_mode               ),

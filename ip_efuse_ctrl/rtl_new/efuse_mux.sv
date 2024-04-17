@@ -1,4 +1,4 @@
-module efuse_mux_new#(
+module efuse_mux#(
     parameter NW = 64,
     parameter NR = 64    
 )(
