@@ -11,6 +11,20 @@ module efuse_aen_gen(
     output logic rg_efuse_aen_use,
     output logic rg_efuse_aen_done
 );
+
+logic aen_off;
+logic aen_on;
+logic efuse_aen_write;
+logic efuse_addr_clear;
+logic efuse_addr_en;
+logic rg_efuse_addr_pre;
+logic rg_efuse_refresh_d1;
+logic [9:0] aen_high_cnt;
+logic aen_high_cnt_clear;
+logic aen_high_cnt_en;
+
+
+
 always_ff@(posedge clk or negedge rst_n) begin
     if(~rst_n)
         rg_efuse_aen_done <= 1'b0;

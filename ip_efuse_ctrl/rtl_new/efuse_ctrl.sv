@@ -9,6 +9,7 @@ module efuse_ctrl #(
     // config from reg_ctrl
     input [1:0] rg_efuse_mode,  // From reg_ctrl    // 0: read, 1: write
     input rg_efuse_start,   // From reg_ctrl @ 6.5M
+    input rg_efuse_refresh, // From reg_ctrl @ 6.5M
     input rg_efuse_blank_en,    // From reg_ctrl @ 6.5M
     input [15:0] rg_efuse_password, // From reg_ctrl @ 6.5M
     input [NW-1:0] rg_efuse_wdata,  // From reg_ctrl @ 6.5M

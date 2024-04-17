@@ -12,6 +12,7 @@ logic   scan_mode = 0;
 logic   pmu_efuse_start                      = 0 ;
 logic   [1:0]  rg_efuse_mode                 = 0 ;
 logic   rg_efuse_start                       = 0 ;
+logic   rg_efuse_refresh                     = 0 ;
 logic   rg_efuse_blank_en                    = 0 ;
 logic   [15:0]  rg_efuse_password            = 16'h55AA ;
 logic   [NW-1:0]  rg_efuse_wdata             = 0 ;
@@ -92,6 +93,7 @@ efuse_ctrl #(.NW ( NW ),.NR ( NR )) efuse_ctrl_inst (
     .pmu_efuse_start                   ( pmu_efuse_start                  ),
     .rg_efuse_mode                     ( rg_efuse_mode                    ),
     .rg_efuse_start                    ( rg_efuse_start                   ),
+    .rg_efuse_refresh                  ( rg_efuse_refresh                 ),
     .rg_efuse_blank_en                 ( rg_efuse_blank_en                ),
     .rg_efuse_password                 ( rg_efuse_password                ),
     .rg_efuse_wdata                    ( rg_efuse_wdata                   ),
