@@ -20,6 +20,7 @@ module efuse_rw_ctrl#(
     output logic                rg_efuse_no_blank,
     output logic                efuse_autoload_done,
     output logic                efuse_autoload_vld,
+    output logic                is_autoload,
     output logic                efuse_busy,
     output logic [$clog2(256/NR)-1:0] efuse_read_sel, // TODO
     output logic [$clog2(256/NW)-1:0] efuse_write_sel, // TODO 
@@ -47,7 +48,7 @@ logic read_done_d1_pos;
 logic read_done_pos;
 logic autoload_done_pre;
 logic autoload_done_pre_d1;
-logic is_autoload;
+//logic is_autoload;
 logic [NR-1:0] efuse_autoload_data;
 logic [NR-1:0] read_data_manual;
 logic efuse_no_blank;

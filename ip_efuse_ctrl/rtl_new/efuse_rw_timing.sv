@@ -5,6 +5,7 @@ module efuse_rw_timing#(parameter NW=64,parameter NR=64)(
     input write_start,  //
     input [$clog2(256/NR)-1:0]  read_sel, 
     input [$clog2(256/NW)-1:0]  write_sel,
+    input is_autoload,
     input [5:0] rg_efuse_trd,
     input [9:0] rg_efuse_tpgm,
     input rg_efuse_mode,    // 0:read 1:write
@@ -44,6 +45,7 @@ logic write_done_pre;
 logic [63:0] wdata_rest;
 logic efuse_d_lock_en;
 logic write_skip;
+logic [7:0] read_end_addr;
 
 assign init_done = 1'b1;
 assign high_timeout = efuse_aen && (tcnt == high_time+1'b1);
@@ -53,7 +55,8 @@ assign low_time = rg_efuse_mode?    'd13:'d9;  // 1900ns : 1250ns
 assign low_end = low_timeout;
 assign high_end = high_timeout;
 assign rw_start = rg_efuse_mode?    write_start : read_start;
-assign read_done_pre = (efuse_addr == (RSEL*read_sel+RSEL-1)) && ~rg_efuse_mode;
+assign read_end_addr = is_autoload?  8'd31:(RSEL*read_sel+RSEL-1);
+assign read_done_pre = (efuse_addr == read_end_addr) && ~rg_efuse_mode && low_end;
 assign write_done_pre = (state_c!=IDLE && state_n==IDLE) && rg_efuse_mode; 
 assign efuse_d_lock_en = efuse_aen & ~rg_efuse_mode & (tcnt == high_time);
 

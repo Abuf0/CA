@@ -57,6 +57,7 @@ logic efuse_aen  ;
 logic [7:0] efuse_addr;
 logic [7:0] read_rdata;
 logic [7:0] efuse_d;
+logic is_autoload;
 
 efuse_rw_ctrl #(.NW(NW),.NR(NR)) efuse_rw_ctrl_inst(
    .clk                        ( clk                            ),
@@ -78,6 +79,7 @@ efuse_rw_ctrl #(.NW(NW),.NR(NR)) efuse_rw_ctrl_inst(
    .rg_efuse_read_done_manual  ( rg_efuse_read_done_manual      ),
    .rg_efuse_write_done_manual ( rg_efuse_write_done_manual     ),
    .rg_efuse_no_blank          ( rg_efuse_no_blank              ),
+   .is_autoload                ( is_autoload                    ),
    .efuse_autoload_done        ( efuse_autoload_done            ),
    .efuse_autoload_vld         ( efuse_autoload_vld             ),
    .efuse_busy                 ( efuse_busy                     ),
@@ -93,7 +95,8 @@ efuse_rw_timing #(.NW(NW),.NR(NR)) efuse_rw_timing_inst (
     .read_start                ( read_start              ),
     .write_start               ( write_start             ),
     .read_sel                  ( efuse_read_sel          ),  
-    .write_sel                 ( efuse_write_sel         ),    
+    .write_sel                 ( efuse_write_sel         ), 
+    .is_autoload                ( is_autoload            ),   
     .rg_efuse_trd              ( rg_efuse_trd            ),
     .rg_efuse_tpgm             ( rg_efuse_tpgm           ),
     .rg_efuse_mode             ( rg_efuse_mode[0]           ),  // TODO       
