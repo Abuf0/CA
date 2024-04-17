@@ -30,7 +30,7 @@ module crgu(
     output logic clk_6p5m_data, // To data_ctrl
     output logic clk_6p5m_fifo, // To fifo_ctrl
     output logic clk_6p5m_efuse,// To efuse_ctrl
-    output logic clk_13m_slot,  // To timeslog_manager
+    output logic clk_13m_slot,  // To timeslot_manager
     output logic clk_13m_afe,   // To AFE
     // reset dest
     output logic rst_32k_alon_n,    // To PMU, INT
