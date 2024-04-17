@@ -2,41 +2,41 @@ module efuse_ctrl_new #(
     parameter NW = 64,
     parameter NR = 64
 )(
-    input clk,
-    input rst_n,
-    input scan_mode,
-    input pmu_efuse_start,
+    input clk,  // From crgu    // 6.5M gated
+    input rst_n,    // From crgu
+    input scan_mode,    // From PAD
+    input pmu_efuse_start,  // From PMU @ 6.5M
     // config from reg_ctrl
-    input [1:0] rg_efuse_mode,
-    input rg_efuse_start,
-    input rg_efuse_blank_en,
-    input [15:0] rg_efuse_password,
-    input [NW-1:0] rg_efuse_wdata,
-    input [5:0] rg_efuse_trd,
-    input [9:0] rg_efuse_tpgm,
-    input rg_efuse_reg_mode,
-    input [$clog2(256/NR)-1:0]  rg_efuse_read_sel, // TODO
-    input [$clog2(256/NW)-1:0]  rg_efuse_write_sel, // TODO
+    input [1:0] rg_efuse_mode,  // From reg_ctrl    // 0: read, 1: write
+    input rg_efuse_start,   // From reg_ctrl @ 6.5M
+    input rg_efuse_blank_en,    // From reg_ctrl @ 6.5M
+    input [15:0] rg_efuse_password, // From reg_ctrl @ 6.5M
+    input [NW-1:0] rg_efuse_wdata,  // From reg_ctrl @ 6.5M
+    input [5:0] rg_efuse_trd,   // From reg_ctrl @ 6.5M
+    input [9:0] rg_efuse_tpgm,  // From reg_ctrl @ 6.5M
+    input rg_efuse_reg_mode,    // From reg_ctrl @ 6.5M     // 0: auto, 1: reg
+    input [$clog2(256/NR)-1:0]  rg_efuse_read_sel, // From reg_ctrl @ 6.5M
+    input [$clog2(256/NW)-1:0]  rg_efuse_write_sel, // From reg_ctrl @ 6.5M
     // reg mode
-    input rg_efuse_pgmen,
-    input rg_efuse_rden,
-    input rg_efuse_aen,
-    input [7:0] rg_efuse_addr,
+    input rg_efuse_pgmen,   // From reg_ctrl @ 6.5M
+    input rg_efuse_rden,    // From reg_ctrl @ 6.5M
+    input rg_efuse_aen, // From reg_ctrl @ 6.5M
+    input [7:0] rg_efuse_addr,  // From reg_ctrl @ 6.5M
     // RO to reg_ctrl
-    output logic [NR-1:0] rg_efuse_rdata,
-    output logic [7:0] rg_efuse_d,
-    output logic rg_efuse_read_done_manual,
-    output logic rg_efuse_write_done_manual,
-    output logic rg_efuse_no_blank,
+    output logic [NR-1:0] rg_efuse_rdata,   // To reg_ctrl
+    output logic [7:0] rg_efuse_d,  // To reg_ctrl
+    output logic rg_efuse_read_done_manual, // To reg_ctrl
+    output logic rg_efuse_write_done_manual,    // To reg_ctrl
+    output logic rg_efuse_no_blank, // To reg_ctrl
     // interface with EFUSE
-    output logic efuse_pgmen_o,
-    output logic efuse_rden_o,
-    output logic efuse_aen_o,
-    output logic [7:0] efuse_addr_o,
-    input [7:0] efuse_rdata_i,
-    output logic efuse_autoload_done,
-    output logic efuse_autoload_vld,
-    output logic efuse_busy
+    output logic efuse_pgmen_o, // To EFUSE IP
+    output logic efuse_rden_o,  // To EFUSE IP
+    output logic efuse_aen_o,   // To EFUSE IP
+    output logic [7:0] efuse_addr_o,    // To EFUSE IP
+    input [7:0] efuse_rdata_i,  // From EFUSE IP
+    output logic efuse_autoload_done,   // To reg_ctrl
+    output logic efuse_autoload_vld,    // To reg_ctrl
+    output logic efuse_busy     // To pmu & reg_ctrl
 );
 
 logic read_done;
