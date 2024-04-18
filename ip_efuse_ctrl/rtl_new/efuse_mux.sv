@@ -61,6 +61,17 @@ assign rg_efuse_d = rg_efuse_reg_mode? use_efuse_rdata:8'd0;
 
 // add for scan
 // ******
+`ifndef FPGA
+SDFFRQX1M dtc_efuse_pgmen_o (.D(efuse_pgmen_o), .SI(1'b0), . SE(1'b0), .CK(clk), .RN(rst_n), .Q( ));
+SDFFRQX1M dtc_efuse_rden_o  (.D(efuse_rden_o), .SI(1'b0), . SE(1'b0), .CK(clk), .RN(rst_n), .Q( ));
+SDFFRQX1M dtc_efuse_aen_o   (.D(efuse_aen_o), .SI(1'b0), . SE(1'b0), .CK(clk), .RN(rst_n), .Q( ));
+genvar i;
+generate
+    for(i=0;i<8;i=i+1) begin: dtc_efuse_addr
+        SDFFRQX1M dtc_efuse_addr_o  (.D(efuse_addr_o[i]), .SI(1'b0), . SE(1'b0), .CK(clk), .RN(rst_n), .Q( ));
+    end
+endgenerate
+`endif
 
 always_ff@(posedge clk or negedge rst_n) begin
     if(~rst_n)

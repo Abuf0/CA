@@ -55,6 +55,7 @@ logic efuse_no_blank;
 logic read_start_auto_pre;
 logic read_start_auto;
 logic efuse_busy_pre;
+logic autoload_data_pre;
 
 
 assign read_en = efuse_autoload_done && read_start;
@@ -103,8 +104,9 @@ always_ff@(posedge clk or negedge rst_n) begin
     else if(is_autoload && read_done_d1_pos)
         autoload_cnt <= autoload_cnt + 1'b1;
 end
-
 assign autoload_done_pre = ((autoload_cnt == AUTOLOAD_TIMES-1) && read_done_d1_pos && is_autoload);
+
+//assign autoload_done_pre =  read_done_d1_pos && is_autoload;
 always_ff@(posedge clk or negedge rst_n) begin
     if(~rst_n)
         efuse_autoload_done <= 1'b0;
@@ -131,7 +133,7 @@ end
 always_ff@(posedge clk or negedge rst_n) begin
     if(~rst_n)
         efuse_no_blank <= 1'b0;
-    else if(is_autoload & read_done_d1_pos & rg_efuse_blank_en) // TODO
+    else if(is_autoload & read_done_d1_pos) // TODO
         efuse_no_blank <= (efuse_no_blank | (efuse_autoload_data != 'd0));
 end
 
@@ -143,6 +145,7 @@ always_ff@(posedge clk or negedge rst_n) begin
 end
 
 assign efuse_read_sel = is_autoload?    autoload_cnt:rg_efuse_read_sel;
+//assign efuse_read_sel = is_autoload?    'd0:rg_efuse_read_sel;
 assign read_start_manual = (rg_efuse_mode==2'd0) && rg_efuse_start && ~efuse_busy_pre;
 assign write_start_manual = (rg_efuse_mode==2'd1) && rg_efuse_start && ~efuse_busy_pre;
 assign read_start = read_start_auto | read_start_manual;     
@@ -187,7 +190,7 @@ always_ff@(posedge clk or negedge rst_n) begin
         read_data_manual <= read_data;
 end
 
-assign autoload_data_pre = is_autoload & read_done_d1_pos & (autoload_cnt==2'd1);    // TODO ???
+assign autoload_data_pre = is_autoload & read_done_d1_pos & (autoload_cnt==2'd0);    // TODO ???
 
 always_ff@(posedge clk or negedge rst_n) begin
     if(~rst_n)

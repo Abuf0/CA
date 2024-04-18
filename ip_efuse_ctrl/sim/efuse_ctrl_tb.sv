@@ -70,7 +70,7 @@ initial begin
     rg_efuse_start = 1;
     @(negedge clk);
     rg_efuse_start = 0;
-    repeat(2000) @(negedge clk);
+    repeat(5000) @(negedge clk);
     rg_efuse_read_sel = 1;
     rg_efuse_mode = 0;
     @(negedge clk);

@@ -96,10 +96,10 @@ efuse_rw_timing #(.NW(NW),.NR(NR)) efuse_rw_timing_inst (
     .write_start               ( write_start             ),
     .read_sel                  ( efuse_read_sel          ),  
     .write_sel                 ( efuse_write_sel         ), 
-    .is_autoload                ( is_autoload            ),   
+    .is_autoload               ( is_autoload             ),   
     .rg_efuse_trd              ( rg_efuse_trd            ),
     .rg_efuse_tpgm             ( rg_efuse_tpgm           ),
-    .rg_efuse_mode             ( rg_efuse_mode[0]           ),  // TODO       
+    .rg_efuse_mode             ( rg_efuse_mode[0]        ),  // TODO       
     .read_data                 ( read_data               ),
     .write_data                ( write_data              ),
     .efuse_pgmen               ( efuse_pgmen             ),

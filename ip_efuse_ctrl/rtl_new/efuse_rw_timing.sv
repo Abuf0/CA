@@ -22,7 +22,7 @@ module efuse_rw_timing#(parameter NW=64,parameter NR=64)(
     output logic write_done
 );
 
-parameter WSEL=NW;
+parameter WSEL=NW/8;
 parameter RSEL=NR/8;
 typedef enum logic [1:0] {IDLE,INIT,AEN_H,AEN_L} state_t;
 state_t state_c,state_n;
@@ -55,8 +55,8 @@ assign low_time = rg_efuse_mode?    'd13:'d9;  // 1900ns : 1250ns
 assign low_end = low_timeout;
 assign high_end = high_timeout;
 assign rw_start = rg_efuse_mode?    write_start : read_start;
-assign read_end_addr = is_autoload?  8'd31:(RSEL*read_sel+RSEL-1);
-assign read_done_pre = (efuse_addr == read_end_addr) && ~rg_efuse_mode && low_end;
+//assign read_end_addr = is_autoload?  8'd31:(RSEL*read_sel+RSEL-1);
+assign read_done_pre = (efuse_addr == RSEL*read_sel+RSEL-1) && ~rg_efuse_mode && low_end;
 assign write_done_pre = (state_c!=IDLE && state_n==IDLE) && rg_efuse_mode; 
 assign efuse_d_lock_en = efuse_aen & ~rg_efuse_mode & (tcnt == high_time);
 
@@ -93,7 +93,7 @@ always @(*) begin
                             state_n = wdata_rest[0]?    AEN_H:AEN_L;
                     end
                     else
-                        state_n = read_done?    IDLE:AEN_H;
+                        state_n = read_done_pre?    IDLE:AEN_H;
                 end
                 else begin
                     state_n = AEN_L;
@@ -120,10 +120,13 @@ always_ff@(posedge clk or negedge rst_n) begin
     if(~rst_n)
         efuse_addr <= 'd0;
     else if(state_c==INIT)
-        //efuse_addr <= NB*rw_sel;
         efuse_addr <= rg_efuse_mode?    WSEL*write_sel:RSEL*read_sel;
-    else if(((state_c==AEN_L) && (state_n==AEN_H)) || write_skip)   // or add tcnt==xx
-        efuse_addr <= efuse_addr + 1'b1;
+    else if(((state_c==AEN_L) && (state_n==AEN_H)) || write_skip) begin
+        if(rg_efuse_mode)
+            efuse_addr <= (efuse_addr[7:5]==3'b111)?    efuse_addr+8'd33:efuse_addr+8'd32;
+        else
+            efuse_addr <= efuse_addr+1'b1;
+    end
 end
 assign write_skip = (state_c == AEN_L && ~wdata_rest[0] && low_end);
 always_ff @(posedge clk or negedge rst_n) begin
@@ -132,7 +135,7 @@ always_ff @(posedge clk or negedge rst_n) begin
     else if(read_start)
         read_data <= 'd0;
     else if(efuse_d_lock_en)  
-        read_data <= {read_data[NR-9:0],efuse_d};
+        read_data <= {efuse_d,read_data[NR-1:8]};
 end
 
 always_ff @(posedge clk or negedge rst_n) begin

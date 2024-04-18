@@ -71,5 +71,11 @@ assign aen_off = efuse_aen_write && (aen_high_cnt == rg_efuse_tpgm-1'b1);
 
 assign rg_efuse_aen_use = ~(rg_efuse_pgmen ^ rg_efuse_rden)?    rg_efuse_aen:efuse_aen_write;
 
+always_ff@(posedge clk or negedge rst_n) begin
+    if(~rst_n)  
+        rg_efuse_refresh_d1 <= 1'b0;
+    else 
+        rg_efuse_refresh_d1 <= rg_efuse_refresh;
+end
 
 endmodule
