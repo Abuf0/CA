@@ -17,12 +17,15 @@ logic   I2C_CLK                              = 0 ;
 logic   AD_POR_RSTN                          = 0 ;
 logic   cmd_reset                            = 0 ;
 logic   shut_rstn                            = 0 ;
+logic   pmu_fifo_rstn                        = 0 ;  
 logic   rg_clk_sel                           = 0 ;
-logic   clk_en                               = 0 ;
 logic   rg_top_start                         = 0 ;
-logic   data_ctrl_en                         = 0 ;
-logic   rg_fifo_clk_en                       = 0 ;
-logic   rg_efuse_en                          = 0 ;
+logic   rg_fifo_clk_en                       = 0 ;                                      
+logic   timer_clk_en                         = 0 ;    
+logic   data_clk_en                          = 0 ;    
+logic   efuse_clk_en                         = 0 ;    
+logic   afe_clk_en                           = 0 ;    
+logic   slot_clk_en                          = 0 ;    
 
 // crgu Outputs
 logic clk_32k                        ;
@@ -59,19 +62,35 @@ initial begin
     repeat(5)   @(negedge AD_OSC32K);
     AD_POR_RSTN = 1;
     shut_rstn = 1;
-    // clk alon case
+    pmu_fifo_rstn = 1;
+    // clk case
     repeat(10)   @(negedge AD_OSC32K);
-    // clk shut case
-    clk_en = 1;
+    timer_clk_en = 1;
     repeat(10)   @(negedge AD_OSC32K);    
-    data_ctrl_en = 1;
+    timer_clk_en = 1;
     repeat(10)   @(negedge AD_OSC32K); 
-    rg_fifo_clk_en = 1;
+    data_clk_en = 1;
     repeat(10)   @(negedge AD_OSC32K); 
-    rg_efuse_en = 1;
+    data_clk_en = 1;
     repeat(10)   @(negedge AD_OSC32K); 
-    rg_top_start = 1;
+    @(negedge AD_OSC13M);
+    rg_fifo_clk_en  = 1;
     repeat(10)   @(negedge AD_OSC32K); 
+    @(negedge AD_OSC13M);
+    rg_fifo_clk_en  = 0;
+    repeat(10)   @(negedge AD_OSC32K); 
+    efuse_clk_en = 1;
+    repeat(10)   @(negedge AD_OSC32K); 
+    efuse_clk_en = 1;
+    repeat(10)   @(negedge AD_OSC32K); 
+    afe_clk_en = 1;
+    repeat(10)   @(negedge AD_OSC32K); 
+    afe_clk_en = 1;
+    repeat(10)   @(negedge AD_OSC32K); 
+    slot_clk_en = 1;
+    repeat(10)   @(negedge AD_OSC32K); 
+    slot_clk_en = 1;
+
     // rstn case
     shut_rstn = 0;
     repeat(10)   @(negedge AD_OSC32K); 
@@ -83,22 +102,14 @@ initial begin
     @(posedge SPI_CLK);
     #1
     cmd_reset = 0;
-    repeat(10)   @(negedge AD_OSC32K); 
-    data_ctrl_en = 0;
-    repeat(10)   @(negedge AD_OSC32K);
-    data_ctrl_en = 1;
-    repeat(10)   @(negedge AD_OSC32K);
-    rg_efuse_en = 0;
-    repeat(10)   @(negedge AD_OSC32K);
-    rg_efuse_en = 1;
     repeat(10)   @(negedge AD_OSC32K);
     rg_top_start = 0;
     repeat(10)   @(negedge AD_OSC32K);
     rg_top_start = 1;
     repeat(10)   @(negedge AD_OSC32K);
-    rg_fifo_clk_en = 0;
+    pmu_fifo_rstn = 0;
     repeat(10)   @(negedge AD_OSC32K);
-    rg_fifo_clk_en = 1;
+    pmu_fifo_rstn = 1;
     repeat(10)   @(negedge AD_OSC32K);      
     @(posedge SPI_CLK);
     #1
@@ -120,12 +131,15 @@ crgu  U_CRGU (
     .AD_POR_RSTN             ( AD_POR_RSTN       ),
     .cmd_reset               ( cmd_reset         ),
     .shut_rstn               ( shut_rstn         ),
+    .pmu_fifo_rstn           ( pmu_fifo_rstn     ),
     .rg_clk_sel              ( rg_clk_sel        ),
-    .clk_en                  ( clk_en            ),
-    .rg_top_start            ( rg_top_start      ),
-    .data_ctrl_en            ( data_ctrl_en      ),
+    .timer_clk_en            ( timer_clk_en      ),
+    .data_clk_en             ( data_clk_en       ),
     .rg_fifo_clk_en          ( rg_fifo_clk_en    ),
-    .rg_efuse_en             ( rg_efuse_en       ),
+    .efuse_clk_en            ( efuse_clk_en      ),
+    .afe_clk_en              ( afe_clk_en        ),
+    .slot_clk_en             ( slot_clk_en       ),
+    .rg_top_start            ( rg_top_start      ),
     .clk_32k                 ( clk_32k           ),
     .clk_32k_tim             ( clk_32k_tim       ),
     .clk_6p5m_reg            ( clk_6p5m_reg      ),
