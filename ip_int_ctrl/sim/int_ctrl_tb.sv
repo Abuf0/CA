@@ -2,6 +2,7 @@ module int_ctrl_tb();
 parameter NW = 11;
 logic           clk_32k;
 logic           rst_n;
+logic           int_pwrup_ready;
 logic [NW-1:0]  rg_int_enable;   // correlate with INT pin 
 logic [NW-1:0]  rg_int_clr; // int clear
 logic           rg_int_low_en;    // 0: HIGH; 1: LOW
@@ -24,6 +25,7 @@ logic           ldo_ov_flag;
 logic           circuit_exc_flag;
 // intr output
 logic [NW-1:0] int_status;   // RO; int status
+logic          int_ack;
 logic          int_out;
 
 logic clk_test;
@@ -34,6 +36,7 @@ always #5000000 clk_test=~clk_test;
 initial begin
     clk_32k = 0;
     clk_test = 0;
+    int_pwrup_ready = 1;
     rst_n = 0;
     rg_int_enable = 1;
     rg_int_clr = 0;
@@ -99,6 +102,7 @@ endtask
 int_ctrl #(.NW(NW)) U_INT_CTRL_0(
 .clk_32k(              clk_32k     ),
 .rst_n(                rst_n     ),
+.int_pwrup_ready(int_pwrup_ready),
 .rg_int_enable(    rg_int_enable),
 .rg_int_clr(        rg_int_clr),
 .rg_int_low_en(        rg_int_low_en ),
@@ -120,6 +124,7 @@ int_ctrl #(.NW(NW)) U_INT_CTRL_0(
 .ldo_ov_flag(        ldo_ov_flag),
 .circuit_exc_flag(        circuit_exc_flag),
 .int_status(int_status),
+.int_ack(int_ack),
 .int_out(int_out)
 );
 

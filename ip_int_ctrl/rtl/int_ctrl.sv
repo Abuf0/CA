@@ -4,6 +4,7 @@ module int_ctrl
 )(
     input           clk_32k,    // From crgu
     input           rst_n,      // From crgu
+    input           int_pwrup_ready,    // From PMU
     // int config
     input [NW-1:0]  rg_int_enable,   // From reg_ctrl @ 6.5M    // TODO : whether to dyna 
     input [NW-1:0]  rg_int_clr,     // From reg_manual after-sync @ 32K //  TODO : merge with status by rdl : onwrite = woclr;
@@ -28,6 +29,8 @@ module int_ctrl
     input           circuit_exc_flag,   // From AFE @ 32K
     // int output
     output logic [NW-1:0] int_status,   // To reg_ctrl  // RO, int status
+    output logic          int_req,      // To PMU
+    output logic          int_ack,      // To PMU
     output logic          int_out       // To PAD
 
 );
@@ -135,8 +138,11 @@ always_ff @(posedge clk_32k or negedge rst_n)  begin
 end
 
 assign int_out = int_out_tmp?   int_vld:~int_vld; 
+assign int_req = |(int_status & int_enable);
+assign int_ack = ~int_req;    // has int req, to wakeup PMU
 
-assign int_on = |(int_status & int_enable);
+//assign int_on = |(int_status & int_enable);
+assign int_on = int_req & int_pwrup_ready;
 assign int_vld = rg_int_low_en? 1'b0:1'b1;
 assign int_out_vld = (int_out == int_vld);
 assign cold_time = {rg_cold_time,5'd0}+13'd31;

@@ -113,7 +113,7 @@ end
 always_ff@(posedge clk or negedge rst_n) begin
     if(~rst_n)
         rg_efuse_no_blank <= 1'b0;
-    else if(autoload_done_en_d1 && rg_efuse_blank_en)
+    else if(rg_efuse_blank_en)
         rg_efuse_no_blank <= efuse_no_blank;
 end
 
