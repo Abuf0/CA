@@ -21,7 +21,8 @@ module crgu(
     input timer_clk_en, // From PMU @ 32K
     input data_clk_en,  // From PMU @ 32K
     input rg_fifo_clk_en,   // From reg_ctrl @ 6.5M
-    input efuse_clk_en,  // From PMU @ 32K
+    input rg_efuse_clk_en,  // From reg_ctrl @ 6.5M
+    input efuse_load_state, // From PMU @ 32K
     input afe_clk_en,   // From PMU @ 32K
     input slot_clk_en,  // From PMU @ 32K
     input rg_top_start, // From reg_ctrl @ 6.5M
@@ -30,6 +31,7 @@ module crgu(
     output logic clk_32k_tim,   // To timer_ctrl
     output logic clk_6p5m_reg,  // To reg_ctrl
     output logic clk_6p5m_spis, // To spis
+    output logic clk_6p5m_spis_n, // To spis
     output logic clk_6p5m_i2cs, // To i2cs
     output logic clk_6p5m_data, // To data_ctrl
     output logic clk_6p5m_fifo, // To fifo_ctrl
@@ -67,6 +69,11 @@ logic clk_spis_scan;
 logic clk_i2cs_scan;
 
 logic ad_por_rstn_scan;
+logic rst_por_n;
+logic [3:0] cmd_reset_dly;
+logic soft_reset;
+logic [2:0] fifo_reset_dly;
+logic fifo_soft_reset;
 logic rst_13m_alon_n;
 logic rst_13m_shut_n;
 logic async_rst_alon_n;
@@ -78,10 +85,9 @@ logic data_clk_en_sync;
 logic efuse_clk_en_sync;
 logic afe_clk_en_sync;
 logic slot_clk_en_sync;
-logic rg_top_start_pos;
-logic rg_top_start_d1;
 
 // generate clock dest
+assign efuse_clk_en_com = efuse_load_state?  1'b1:rg_efuse_clk_en;
 // clk_32k_alon_scan
 genpart_ckmux2 dtc_OSC32K_scanmux   (.clkin1(scan_clk), .clkin0(AD_OSC32K), .sel(scan_mode), .clkout(AD_OSC32K_scan));
 genpart_ckmux2 dtc_CLKIN_scanmux   (.clkin1(scan_clk), .clkin0(CLKIN), .sel(scan_mode), .clkout(CLKIN_scan));
@@ -112,24 +118,26 @@ genpart_ckgt clk_6p5m_data_ckgt_inst (.clk(clk_13m_alon_scan), .gclk(clk_6p5m_da
 genpart_ckgt clk_6p5m_fifo_ckgt_inst (.clk(clk_13m_alon_scan), .gclk(clk_6p5m_fifo), .scan_enable(scan_enable), .enable(rg_fifo_clk_en));
 
 // clk_6p5m_efuse
-genpart_ckgt clk_6p5m_efuse_ckgt_inst (.clk(clk_13m_alon_scan), .gclk(clk_6p5m_efuse), .scan_enable(scan_enable), .enable(efuse_clk_en_sync));
+genpart_ckgt clk_6p5m_efuse_ckgt_inst (.clk(clk_13m_alon_scan), .gclk(clk_6p5m_efuse), .scan_enable(scan_enable), .enable(efuse_clk_en_com_sync));
 
 // clk_6p5m_reg // clk_6p5m_spis // clk_6p5m_i2cs
 assign clk_6p5m_reg = clk_6p5m_alon_scan;
 assign clk_6p5m_spis = clk_6p5m_alon_scan;
 assign clk_6p5m_i2cs = clk_6p5m_alon_scan;
+assign clk_6p5m_spis_n = scan_mode?  clk_6p5m_spis:~clk_6p5m_spis;
 
 // SPIS/I2CS
 genpart_ckmux2 dtc_clk_spis_scanmux   (.clkin1(scan_clk), .clkin0(SPI_CLK), .sel(scan_mode), .clkout(clk_spis_scan));
 genpart_ckmux2 dtc_clk_i2cs_scanmux   (.clkin1(scan_clk), .clkin0(I2C_CLK), .sel(scan_mode), .clkout(clk_i2cs_scan));
 
 // generate reset dest
-assign async_rst_alon_n = AD_POR_RSTN & ~cmd_reset;
+assign async_rst_alon_n = AD_POR_RSTN & ~soft_reset;
 assign async_rst_shut_n = async_rst_alon_n & shut_rstn;
-assign fifo_rstn = rg_top_start_pos | ~rg_fifo_clk_en;
+assign fifo_rstn = fifo_soft_reset | ~rg_fifo_clk_en;
 assign async_rst_fifo_n = async_rst_alon_n & pmu_fifo_rstn;
 // alon
 genpart_ckmux2 dtc_ad_por_rstn_scanmux   (.clkin1(scan_rstn), .clkin0(AD_POR_RSTN), .sel(scan_mode), .clkout(ad_por_rstn_scan));
+genpart_rstn rstn_por_n_inst (.clk(clk_32k_alon_scan), .rstn_i(ad_por_rstn_scan), .sw_reset(1'b0), .scan_mode(scan_mode), .scan_rstn(scan_rstn), .rstn_o(rst_por_n));
 genpart_rstn rstn_32k_alon_n_inst (.clk(clk_32k_alon_scan), .rstn_i(async_rst_alon_n), .sw_reset(1'b0), .scan_mode(scan_mode), .scan_rstn(scan_rstn), .rstn_o(rst_32k_alon_n));
 genpart_rstn rstn_13m_alon_n_inst (.clk(clk_13m_alon_scan), .rstn_i(async_rst_alon_n), .sw_reset(1'b0), .scan_mode(scan_mode), .scan_rstn(scan_rstn), .rstn_o(rst_13m_alon_n));
 genpart_rstn rstn_tim_n_inst (.clk(clk_32k_alon_scan), .rstn_i(async_rst_alon_n), .sw_reset(~rg_top_start), .scan_mode(scan_mode), .scan_rstn(scan_rstn), .rstn_o(rst_tim_n));
@@ -149,16 +157,36 @@ assign rst_slot_n = rst_afe_n;
 
 // sync
 sync_level data_clk_en_sync_inst (.clk(clk_6p5m_alon_scan), .rstn(rst_13m_alon_n), .data_in(data_clk_en), .data_out(data_clk_en_sync));    // 32K --> 6.5M
-sync_level efuse_clk_en_sync_inst (.clk(clk_6p5m_alon_scan), .rstn(rst_13m_alon_n), .data_in(efuse_clk_en), .data_out(efuse_clk_en_sync));    // 32K --> 6.5M
+sync_level efuse_clk_en_com_sync_inst (.clk(clk_6p5m_alon_scan), .rstn(rst_13m_alon_n), .data_in(efuse_clk_en_com), .data_out(efuse_clk_en_com_sync));    // 32K --> 6.5M
 sync_level afe_clk_en_sync_inst (.clk(clk_13m_alon_scan), .rstn(rst_13m_alon_n), .data_in(afe_clk_en), .data_out(afe_clk_en_sync));    // 32K --> 13M
 sync_level slot_clk_en_sync_inst (.clk(clk_13m_alon_scan), .rstn(rst_13m_alon_n), .data_in(slot_clk_en), .data_out(slot_clk_en_sync));    // 32K --> 13M
 
-always_ff@(posedge clk_6p5m_reg or negedge rst_reg_n) begin
-    if(~rst_reg_n)
-        rg_top_start_d1 <= 1'b0;
-    else 
-        rg_top_start_d1 <= rg_top_start;
+always_ff@(posedge clk_32k_alon_scan or negedge rst_por_n) begin
+    if(~rst_por_n)
+        cmd_reset_dly <= 4'd0;
+    else
+        cmd_reset_dly <= {cmd_reset_dly[2:0],cmd_reset};
 end
-assign rg_top_start_pos = rg_top_start & ~rg_top_start_d1;
+
+always_ff@(posedge clk_32k_alon_scan or negedge rst_por_n) begin
+    if(~rst_por_n)
+        soft_reset <= 1'b0;
+    else
+        soft_reset <= |cmd_reset_dly;
+end
+
+always_ff@(posedge clk_6p5m_alon or negedge rst_13m_alon_n) begin
+    if(~rst_13m_alon_n)
+        fifo_reset_dly <= 3'd0;
+    else
+        fifo_reset_dly <= {fifo_reset_dly[1:0],rg_top_start};
+end
+
+always_ff@(posedge clk_6p5m_alon or negedge rst_13m_alon_n) begin
+    if(~rst_13m_alon_n)
+        fifo_soft_reset <= 1'b0;
+    else
+        fifo_soft_reset <= ~fifo_reset_dly[2] && rg_top_start;
+end
 
 endmodule
