@@ -24,7 +24,7 @@ logic   rg_fifo_clk_en                       = 0 ;
 logic   timer_clk_en                         = 0 ;    
 logic   data_clk_en                          = 0 ;    
 logic   efuse_clk_en                         = 0 ;    
-logic   afe_clk_en                           = 0 ;    
+logic   osc13m_clk_en                           = 0 ;    
 logic   slot_clk_en                          = 0 ;    
 
 // crgu Outputs
@@ -83,9 +83,9 @@ initial begin
     repeat(10)   @(negedge AD_OSC32K); 
     efuse_clk_en = 1;
     repeat(10)   @(negedge AD_OSC32K); 
-    afe_clk_en = 1;
+    osc13m_clk_en = 1;
     repeat(10)   @(negedge AD_OSC32K); 
-    afe_clk_en = 1;
+    osc13m_clk_en = 1;
     repeat(10)   @(negedge AD_OSC32K); 
     slot_clk_en = 1;
     repeat(10)   @(negedge AD_OSC32K); 
@@ -137,7 +137,7 @@ crgu  U_CRGU (
     .data_clk_en             ( data_clk_en       ),
     .rg_fifo_clk_en          ( rg_fifo_clk_en    ),
     .efuse_clk_en            ( efuse_clk_en      ),
-    .afe_clk_en              ( afe_clk_en        ),
+    .osc13m_clk_en           ( osc13m_clk_en     ),
     .slot_clk_en             ( slot_clk_en       ),
     .rg_top_start            ( rg_top_start      ),
     .clk_32k                 ( clk_32k           ),
