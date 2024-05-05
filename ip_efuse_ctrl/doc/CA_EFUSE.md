@@ -99,3 +99,10 @@
 8. 随后配置rg_efuse_aen_tmp=0，再次对rg_efuse_refresh做W1C，刷新并同步寄存器；
 9. 如要读取下一个8bit，重复<4-8>；如果无需读取，配置rg_efuse_pgmen_tmp=0，rg_efuse_rden_tmp=0，rg_efuse_addr_tmp=0，再次对rg_efuse_refresh做W1C，刷新并同步寄存器，结束读操作，回到Inactive状态；
 10. 配置rg_efuse_reg_mode=0，退出寄存器模式；
+
+
+![alt text](read_timing.png)
+
+![alt text](write_timing.png)
+
+![alt text](ctrl.png)
