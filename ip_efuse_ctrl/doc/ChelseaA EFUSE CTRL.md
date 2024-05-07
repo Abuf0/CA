@@ -1,4 +1,12 @@
-# Chelsea_A efuse_ctrl 设计文档
+# ChelseaA efuse_ctrl 设计文档
+
+#### 修订记录：
+
+| 版本 |   日期   | 修改内容及理由 | 拟制人 |
+| :--: | :------: | :------------: | :----: |
+| V0.1 | 2024-5-4 |  完成初版设计  | 王雨非 |
+|      |          |                |        |
+|      |          |                |        |
 
 ## 1.模块概述
 
@@ -36,7 +44,7 @@
 
 ### 3.1 整体架构
 
-![image-20240505152127350](C:\Users\微软\AppData\Roaming\Typora\typora-user-images\image-20240505152127350.png)
+![image-20240505152127350](.\arch.png)
 
 ### 3.2 顶层接口列表
 
@@ -78,7 +86,7 @@
 
 ​	本项目的设计需求中，硬件需要实现上电后自动Autoload、支持连续64bit读写、支持空片检查的时序控制，因此efuse_ctrl顶层的控制状态分为如下：STANDBY、AUTOLOAD、READ、WRITE和BLANK_CHK。可以看到，各个功能模式之间都被STANBY模式隔离开，保证了读写之间有足够的时间间隔，且保证了产生的PGMEN和RDEN不会进入两个都为HIGH的禁用模式。<br/>	其中AUTOLOAD是芯片上电复位后，收到PMU发出的pmu_efuse_start脉冲后，efuse_ctrl从STANDBY进入AUTOLOAD，直到加载完成；其余几个功能状态都必须是完成AUTOLOAD上电后才能进行，且各个功能相互独立，无法同时进行。
 
-![image-20240430150815521](C:\Users\微软\AppData\Roaming\Typora\typora-user-images\image-20240430150815521.png)
+![image-20240430150815521](.\ctrl fsm.png)
 
 ### 4.2 efuse_rw_timing模块设计
 
@@ -86,11 +94,11 @@
 
 #### 4.2.1 READ timing FSM
 
-![image-20240430150835308](C:\Users\微软\AppData\Roaming\Typora\typora-user-images\image-20240430150835308.png)
+![image-20240430150835308](.\read timing.png)
 
 #### 4.2.2 WRITE timing FSM
 
-![image-20240430150848145](C:\Users\微软\AppData\Roaming\Typora\typora-user-images\image-20240430150848145.png)
+![image-20240430150848145](.\write timing.png)
 
 ### 4.3 efuse_aen_gen模块设计
 
@@ -105,7 +113,7 @@
 #### 5.1 上电Autoload流程
 
 1. 上电复位时，信号全初始化到Inactive状态；
-2. 复位后，PMU产生pmu_efuse_start，此时EFUSE进入autoload流程
+2. 复位后，PMU产生pmu_efuse_start，此时EFUSE进入autoload流程；
    - is_autoload拉高，直到autoload结束
    - 复位释放后efuse_busy拉高，直到autoload结束
    - 产生内部read_start
@@ -117,7 +125,7 @@
 
 - 写操作对电压有要求，上下电时需要保证电压满足datasheet要求
 
-1. 上电完成autoload流程后，用户配置写保护寄存器rg_efuse_password（0x66AA）；配置操作模式：rg_efuse_mode=1（写入）；
+1. 上电完成autoload流程后，用户配置写保护寄存器rg_efuse_password（0x66AA）；配置操作模式：rg_efuse_mode=1；
 2. 配置要写入的位置和64bit数据：rg_efuse_sel、rg_efuse_wr_data；
 3. 启动写操作：rg_efuse_start（W1C）；
 4. 查询rg_efuse_write_done拉高后表示64bit写操作完成；
@@ -140,7 +148,7 @@
 - 写操作对电压有要求，上下电时需要保证电压满足datasheet要求
 
 1. 上电完成autoload流程后，配置寄存器操作模式：rg_efuse_reg_mode=1；
-2. 配置寄存器rg_efuse_pgmen=1（配置保证rg_efuse_rden=0）
+2. 配置寄存器rg_efuse_pgmen=1（需要保证此前rg_efuse_rden=0）
 3. 配置寄存器rg_efuse_addr[7:0]为所需burning的地址（即要写1的地址）
 4. 配置寄存器rg_efuse_refresh=W1C，此时硬件自动产生一个和rg_efuse_tpgm对应脉宽的AEN电平信号，送给EFUSE IP；（其余几个控制信号都是直接根据寄存器配置得到，无需硬件产生）
 5. 如果要继续写操作，重复<3-4>；如果无需继续写入，配置rg_efuse_pgmen=0（配置保证rg_efuse_rden=0），结束写操作，回到Inactive状态；
@@ -160,7 +168,7 @@
 
 #### 5.6 空片检查
 
-- 开启空片检查使能后，efuse_ctrl才会启动空片检查功能，检查EFUSE IP内部256bit数据是否全为0，如果全为0，回写rg_efuse_no_blank为0，表示该EFUSE为空片，否则写1。
+- 开启空片检查使能后，efuse_ctrl才会启动空片检查功能，检查EFUSE IP内部256bit数据是否全为0，如果全为0，回写rg_efuse_no_blank为0，表示该EFUSE为空片，否则写1；
 
 1. 上电完成autoload流程后，如果要进行空片检查，配置寄存器rg_efuse_blank_en=WC；
 2. 查询rg_efuse_blank_done拉高后表示空片检查完成，获得空片检查结果rg_efuse_no_blank；【0504新增信号：空片检查完成信号rg_efuse_blank_done】
@@ -177,7 +185,7 @@
 | rg_efuse_blank_en          | input     | 1     | 空片检测使能，WC                                             |
 | rg_efuse_password          | input     | 16    | 写保护，为0x66AA时才能进行硬件写                             |
 | rg_efuse_wdata             | input     | 64    | 64bit硬件写模式的写数据                                      |
-| rg_efuse_trd               | input     | 5     | 读操作AEN高电平时间，单位为cycle，配置范围{9~31}             |
+| rg_efuse_trd               | input     | 5     | 读操作AEN高电平时间，单位为cycle，配置范围{7~31}             |
 | rg_efuse_tpgm              | input     | 7→4   | 写操作AEN高电平时间，单位为cycle，配置范围{59~71}→{0,12}+59【0504新增，RTL TODO】 |
 | rg_efuse_reg_mode          | input     | 1     | 是否由寄存器直接控制efuse读写，高有效                        |
 | rg_efuse_sel               | input     | 2     | 硬件读写256bit中哪64bit                                      |
@@ -210,3 +218,4 @@
   - [ ] 读操作、写操作的时序是否符合EFUSE datasheet要求
   - [ ] 读写操作的切换的时序是否满足EFUSE datasheet要求
   - [ ] 时序的配置是否符合本datasheet描述
+  - [ ] efuse中存储的256bit数据mapping是否符合产测&DE提供的excel表格
