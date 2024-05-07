@@ -86,7 +86,7 @@
 
 ​	本项目的设计需求中，硬件需要实现上电后自动Autoload、支持连续64bit读写、支持空片检查的时序控制，因此efuse_ctrl顶层的控制状态分为如下：STANDBY、AUTOLOAD、READ、WRITE和BLANK_CHK。可以看到，各个功能模式之间都被STANBY模式隔离开，保证了读写之间有足够的时间间隔，且保证了产生的PGMEN和RDEN不会进入两个都为HIGH的禁用模式。<br/>	其中AUTOLOAD是芯片上电复位后，收到PMU发出的pmu_efuse_start脉冲后，efuse_ctrl从STANDBY进入AUTOLOAD，直到加载完成；其余几个功能状态都必须是完成AUTOLOAD上电后才能进行，且各个功能相互独立，无法同时进行。
 
-![image-20240430150815521](./ctrl fsm.png)
+![image-20240430150815521](./ctrl_fsm.png)
 
 ### 4.2 efuse_rw_timing模块设计
 
@@ -94,11 +94,11 @@
 
 #### 4.2.1 READ timing FSM
 
-![image-20240430150835308](./read timing.png)
+![image-20240430150835308](./read_timing.png)
 
 #### 4.2.2 WRITE timing FSM
 
-![image-20240430150848145](./write timing.png)
+![image-20240430150848145](./write_timing.png)
 
 ### 4.3 efuse_aen_gen模块设计
 
