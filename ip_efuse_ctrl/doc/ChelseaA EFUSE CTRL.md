@@ -98,7 +98,7 @@
 
 #### 4.2.2 WRITE timing FSM
 
-![image-20240430150848145](./write_timing.png)
+![image-20240507162955577](./write_timing.png)
 
 ### 4.3 efuse_aen_gen模块设计
 
